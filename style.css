@@ -1,0 +1,48 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* Global font */
+html, body, div, h1, h2, h3, p {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Title Styling */
+h1 {
+    color: #0a0a33; /* Dark navy */
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5em;
+}
+
+/* Subheaders (e.g., "Choose Date", "Enter date in between") */
+h2, h3 {
+    color: #4b004f; /* Deep magenta */
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+}
+
+/* Metric cards */
+.stMetric {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 1em;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1rem;
+}
+
+/* Hide Streamlit branding */
+footer, #MainMenu, header {
+    visibility: hidden;
+}
+
+/* Chart container (reduced size) */
+.element-container:has(canvas) {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 0.7rem; /* Reduced padding */
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    max-height: 400px; /* Control max chart height */
+    overflow-y: auto;
+}
