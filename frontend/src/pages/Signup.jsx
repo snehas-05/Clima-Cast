@@ -1,11 +1,58 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FormField from '../components/ui/FormField';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Signup() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', home_city: '' });
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
-  const handleSubmit = (e) => { e.preventDefault(); };
+  
+  const validatePassword = (pass) => {
+    if (pass.length < 8) return "Password must be at least 8 characters long";
+    if (!/[A-Z]/.test(pass)) return "Password must contain an uppercase letter";
+    if (!/[a-z]/.test(pass)) return "Password must contain a lowercase letter";
+    if (!/\d/.test(pass)) return "Password must contain a number";
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (form.password !== form.confirm) {
+      return setError('Passwords do not match');
+    }
+    
+    const passError = validatePassword(form.password);
+    if (passError) {
+      return setError(passError);
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const res = await signup({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        home_city: form.home_city || null
+      });
+      
+      if (res.success) {
+        navigate('/dashboard');
+      } else {
+        setError(res.message || 'Signup failed');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.response?.data?.detail?.[0]?.msg || 'An error occurred during signup');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="glass-panel max-w-[500px] w-full p-10 rounded-xl shadow-[0_40px_60px_-15px_rgba(15,23,42,0.08)]">
@@ -18,11 +65,15 @@ export default function Signup() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <FormField label="Full Name" icon="person" placeholder="Enter your full name" id="name" value={form.name} onChange={update('name')} />
-        <FormField label="Email Address" icon="mail" type="email" placeholder="name@company.com" id="email" value={form.email} onChange={update('email')} />
+        {error && <div className="text-red-500 text-sm font-medium bg-red-100 p-3 rounded">{error}</div>}
+        
+        <FormField label="Full Name" icon="person" placeholder="Enter your full name" id="name" value={form.name} onChange={update('name')} required />
+        <FormField label="Email Address" icon="mail" type="email" placeholder="name@company.com" id="email" value={form.email} onChange={update('email')} required />
+        <FormField label="Home City (Optional)" icon="location_city" placeholder="e.g. San Francisco" id="home_city" value={form.home_city} onChange={update('home_city')} />
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField label="Password" icon="lock" type="password" placeholder="••••••••" id="password" value={form.password} onChange={update('password')} />
-          <FormField label="Confirm Password" icon="verified_user" type="password" placeholder="••••••••" id="confirm" value={form.confirm} onChange={update('confirm')} />
+          <FormField label="Password" icon="lock" type="password" placeholder="••••••••" id="password" value={form.password} onChange={update('password')} required />
+          <FormField label="Confirm Password" icon="verified_user" type="password" placeholder="••••••••" id="confirm" value={form.confirm} onChange={update('confirm')} required />
         </div>
 
         <div className="space-y-2">
@@ -38,14 +89,14 @@ export default function Signup() {
         </div>
 
         <div className="flex items-start gap-3 py-2">
-          <input type="checkbox" id="terms" className="w-5 h-5 text-primary border-outline-variant/50 rounded focus:ring-primary/20 bg-white/50 mt-0.5" />
+          <input type="checkbox" id="terms" required className="w-5 h-5 text-primary border-outline-variant/50 rounded focus:ring-primary/20 bg-white/50 mt-0.5" />
           <label htmlFor="terms" className="text-body-main text-on-surface-variant text-sm">
             I accept the <Link to="#" className="text-primary font-semibold hover:underline">Terms of Service</Link> and <Link to="#" className="text-primary font-semibold hover:underline">Privacy Policy</Link>
           </label>
         </div>
 
-        <button type="submit" className="w-full py-4 px-6 bg-gradient-to-r from-primary to-primary-container text-white text-h3-card-title rounded-lg shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.98] transition-all">
-          Create Account
+        <button type="submit" disabled={isSubmitting} className="w-full py-4 px-6 bg-gradient-to-r from-primary to-primary-container text-white text-h3-card-title rounded-lg shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed">
+          {isSubmitting ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
 

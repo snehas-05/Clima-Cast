@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import IconButton from '../ui/IconButton';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function TopBar({ title, subtitle, children }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { user, logout } = useAuth();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 glass-topbar">
@@ -18,7 +21,7 @@ export default function TopBar({ title, subtitle, children }) {
         </div>
 
         {/* Right: Search + actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 relative">
           {/* Search */}
           <div className="relative group hidden md:block">
             <span className="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary">
@@ -39,12 +42,36 @@ export default function TopBar({ title, subtitle, children }) {
           <div className="h-8 w-px bg-outline-variant/30 mx-1 hidden sm:block" />
 
           {/* User avatar area */}
-          <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-all">
-              <div className="w-full h-full bg-primary-container flex items-center justify-center text-on-primary-container">
-                <span className="material-symbols-outlined">person</span>
+          <div className="relative">
+            <div 
+              className="flex items-center gap-3 cursor-pointer group"
+              onClick={() => setShowDropdown(!showDropdown)}
+            >
+              <div className="hidden sm:block text-right">
+                <p className="text-body-main font-semibold text-on-surface">{user?.name || 'User'}</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-all">
+                <div className="w-full h-full bg-primary-container flex items-center justify-center text-on-primary-container">
+                  <span className="material-symbols-outlined">person</span>
+                </div>
               </div>
             </div>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50">
+                <div className="px-4 py-2 border-b border-outline-variant/30 sm:hidden">
+                  <p className="text-body-main font-semibold text-on-surface">{user?.name}</p>
+                  <p className="text-label-caps text-on-surface-variant truncate">{user?.email}</p>
+                </div>
+                <button 
+                  onClick={logout}
+                  className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Extra actions from parent */}

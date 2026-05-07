@@ -17,6 +17,8 @@ import SavedCities from './pages/SavedCities';
 import Alerts from './pages/Alerts';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import PrivateRoute from './components/PrivateRoute';
+import PublicRoute from './components/PublicRoute';
 
 function App() {
   return (
@@ -28,22 +30,26 @@ function App() {
       </Route>
 
       {/* Auth Routes */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+      <Route element={<PublicRoute />}>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
       </Route>
 
       {/* Dashboard Routes */}
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/forecast" element={<Forecast />} />
-        <Route path="/predictions" element={<AIPredictions />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/map" element={<InteractiveMap />} />
-        <Route path="/saved-cities" element={<SavedCities />} />
-        <Route path="/alerts" element={<Alerts />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
+      <Route element={<PrivateRoute />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/forecast" element={<Forecast />} />
+          <Route path="/predictions" element={<AIPredictions />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/map" element={<InteractiveMap />} />
+          <Route path="/saved-cities" element={<SavedCities />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
       </Route>
 
       {/* Catch-all redirect */}
