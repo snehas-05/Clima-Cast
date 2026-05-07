@@ -58,17 +58,21 @@ export default function Sidebar({ isOpen, onClose }) {
                 }`
               }
             >
-              <span
-                className="material-symbols-outlined"
-                style={({ isActive }) =>
-                  isActive
-                    ? { fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }
-                    : undefined
-                }
-              >
-                {icon}
-              </span>
-              <span className="text-body-main">{label}</span>
+              {({ isActive }) => (
+                <>
+                  <span
+                    className="material-symbols-outlined"
+                    style={
+                      isActive
+                        ? { fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }
+                        : undefined
+                    }
+                  >
+                    {icon}
+                  </span>
+                  <span className="text-body-main">{label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>

@@ -21,10 +21,10 @@ export default function Login() {
       if (res.success) {
         navigate('/dashboard');
       } else {
-        setError(res.message || 'Login failed');
+        setError(res.error || res.message || 'Login failed');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred during login');
+      setError(err.response?.data?.error || err.response?.data?.message || 'An error occurred during login');
     } finally {
       setIsSubmitting(false);
     }

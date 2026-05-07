@@ -13,9 +13,10 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       if (token) {
         try {
-          const res = await authService.getProfile();
-          if (res.success) {
-            setUser(res.data.user);
+          const response = await authService.getProfile();
+          const payload = response.data;
+          if (payload.success) {
+            setUser(payload.data.user);
             setIsAuthenticated(true);
           } else {
             // Token invalid or expired
@@ -36,25 +37,29 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const handleLogin = async (credentials) => {
-    const res = await authService.login(credentials);
-    if (res.success) {
-      localStorage.setItem('climacast_token', res.data.access_token);
-      setToken(res.data.access_token);
-      setUser(res.data.user);
+    const response = await authService.login(credentials);
+    const payload = response.data;
+    if (payload.success) {
+      const { access_token, user } = payload.data;
+      localStorage.setItem('climacast_token', access_token);
+      setToken(access_token);
+      setUser(user);
       setIsAuthenticated(true);
     }
-    return res;
+    return payload;
   };
 
   const handleSignup = async (userData) => {
-    const res = await authService.signup(userData);
-    if (res.success) {
-      localStorage.setItem('climacast_token', res.data.access_token);
-      setToken(res.data.access_token);
-      setUser(res.data.user);
+    const response = await authService.signup(userData);
+    const payload = response.data;
+    if (payload.success) {
+      const { access_token, user } = payload.data;
+      localStorage.setItem('climacast_token', access_token);
+      setToken(access_token);
+      setUser(user);
       setIsAuthenticated(true);
     }
-    return res;
+    return payload;
   };
 
   const handleLogout = async () => {

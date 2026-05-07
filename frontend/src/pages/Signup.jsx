@@ -45,10 +45,10 @@ export default function Signup() {
       if (res.success) {
         navigate('/dashboard');
       } else {
-        setError(res.message || 'Signup failed');
+        setError(res.error || res.message || 'Signup failed');
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.detail?.[0]?.msg || 'An error occurred during signup');
+      setError(err.response?.data?.error || err.response?.data?.message || err.response?.data?.detail?.[0]?.msg || 'An error occurred during signup');
     } finally {
       setIsSubmitting(false);
     }
