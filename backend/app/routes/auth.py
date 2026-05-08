@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Any
 
-from app.database import get_db
+from app.database.connection import get_db
 from app.models.user import User
+from app.models.preferences import UserPreference, ThemeType, UnitType
 from app.schemas.user import UserCreate, UserLogin, UserResponse, StandardResponse
 from app.utils.hashing import hash_password, verify_password
 from app.utils.jwt import create_access_token
@@ -33,6 +34,16 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        
+        # Automatically create default preferences
+        default_prefs = UserPreference(
+            user_id=new_user.id,
+            theme=ThemeType.DARK,
+            unit=UnitType.CELSIUS,
+            show_confidence=True
+        )
+        db.add(default_prefs)
+        db.commit()
         
         # Generate token
         access_token = create_access_token({"user_id": new_user.id, "email": new_user.email})

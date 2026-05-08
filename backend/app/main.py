@@ -1,13 +1,32 @@
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 
-from app.database import engine, Base
+from app.database.connection import engine, get_db
+from app.database.base import Base
 from app.routes import auth
+from app.utils.city_checker import get_supported_cities
+import app.models  # Ensure models are imported for Base.metadata
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    # Create tables
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Error creating database tables: {e}")
+
+    # Load supported cities into cache
+    get_supported_cities()
+    
     yield
 
 app = FastAPI(
@@ -19,7 +38,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware — allow frontend at localhost:5173
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -42,7 +61,23 @@ async def root():
         "docs": "/docs",
     }
 
-
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy"}
+
+@app.get("/health/db", tags=["Health"])
+async def health_db(db: Session = Depends(get_db)):
+    """Verify database connectivity."""
+    try:
+        db.execute(text("SELECT 1"))
+        return {
+            "success": True,
+            "database": "connected"
+        }
+    except Exception as e:
+        logger.error(f"Database connection health check failed: {e}")
+        return {
+            "success": False,
+            "database": "disconnected",
+            "error": str(e)
+        }
