@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 from app.database.connection import engine, get_db
 from app.database.base import Base
-from app.routes import auth
+from app.routes import auth, weather
 from app.utils.city_checker import get_supported_cities
 import app.models  # Ensure models are imported for Base.metadata
 
@@ -26,6 +26,9 @@ async def lifespan(app: FastAPI):
 
     # Load supported cities into cache
     get_supported_cities()
+    
+    logger.info("Weather cache initialized")
+    logger.info("OpenWeather integration active")
     
     yield
 
@@ -51,6 +54,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+app.include_router(weather.router, prefix="/weather", tags=["Weather"])
 
 @app.get("/", tags=["Health"])
 async def root():

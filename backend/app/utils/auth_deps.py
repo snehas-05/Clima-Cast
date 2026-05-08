@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -38,3 +39,22 @@ def get_current_user(
         )
         
     return user
+
+def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    if not credentials:
+        return None
+        
+    token = credentials.credentials
+    payload = verify_token(token)
+    
+    if not payload:
+        return None
+        
+    user_id = payload.get("user_id")
+    if user_id is None:
+        return None
+        
+    return db.query(User).filter(User.id == user_id).first()

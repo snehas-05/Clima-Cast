@@ -1,0 +1,25 @@
+# Build and Dist
+dist/
+build/
+*.pyc
+__pycache__/
+.DS_Store
+
+# Environments
+.env
+.env.local
+.env.*.local
+venv/
+env/
+.venv/
+node_modules/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+backend/.env
+frontend/.env

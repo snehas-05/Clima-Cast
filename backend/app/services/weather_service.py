@@ -1,0 +1,215 @@
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+
+from app.models.cache import WeatherCache, is_cache_expired
+from app.models.user import User
+from app.models.preferences import UnitType
+from app.models.history import SearchHistory
+from app.utils.openweather import openweather_api
+from app.utils.city_checker import is_city_in_model
+from app.utils.weather_icons import get_weather_theme
+
+logger = logging.getLogger("uvicorn.error")
+
+class WeatherService:
+    @staticmethod
+    async def get_current_weather(db: Session, city: str, user: Optional[User] = None) -> Dict[str, Any]:
+        # 1. Check Cache
+        cached = db.query(WeatherCache).filter(WeatherCache.city == city).first()
+        use_cache = False
+        stale_cache = False
+
+        if cached and not is_cache_expired(cached.updated_at):
+            use_cache = True
+            logger.info(f"Using valid cache for city: {city}")
+        
+        # 2. Call API if cache invalid or missing
+        api_data = None
+        if not use_cache:
+            try:
+                api_data = await openweather_api.get_current_weather(city)
+                if api_data:
+                    # Update cache
+                    if cached:
+                        cached.api_data = api_data
+                        cached.updated_at = datetime.now()
+                    else:
+                        new_cache = WeatherCache(city=city, api_data=api_data)
+                        db.add(new_cache)
+                    db.commit()
+                else:
+                    if cached:
+                        stale_cache = True
+                        api_data = cached.api_data
+                        logger.warning(f"API failed, using stale cache for city: {city}")
+            except Exception as e:
+                if cached:
+                    stale_cache = True
+                    api_data = cached.api_data
+                    logger.warning(f"API error, using stale cache for city: {city}")
+                else:
+                    raise e
+
+        if not api_data and cached:
+            api_data = cached.api_data
+            stale_cache = True
+        
+        if not api_data:
+            return {"success": False, "message": f"Could not fetch weather for {city}", "error": "API Failure"}
+
+        # 3. Format Response
+        weather_data = WeatherService._format_current_weather(api_data, user)
+        weather_data["ml_available"] = is_city_in_model(city)
+        
+        # 4. Update Search History if user is authenticated
+        if user:
+            WeatherService._update_search_history(db, user.id, city)
+
+        return {
+            "success": True,
+            "message": "Weather fetched successfully",
+            "data": weather_data,
+            "stale_cache": stale_cache
+        }
+
+    @staticmethod
+    async def get_forecast(db: Session, city: str, user: Optional[User] = None) -> Dict[str, Any]:
+        # Forecast is less sensitive, but we can still cache it in the same table or a separate one.
+        # For Phase 5, let's use the API directly or simple caching.
+        # OpenWeather /forecast returns 5 days every 3 hours (40 data points).
+        
+        try:
+            api_data = await openweather_api.get_forecast(city)
+            if not api_data:
+                return {"success": False, "message": f"Could not fetch forecast for {city}"}
+            
+            forecast_data = WeatherService._aggregate_forecast(api_data, user)
+            
+            return {
+                "success": True,
+                "message": "Forecast fetched successfully",
+                "data": forecast_data
+            }
+        except Exception as e:
+            logger.error(f"Error fetching forecast: {e}")
+            return {"success": False, "message": str(e)}
+
+    @staticmethod
+    async def get_by_coordinates(db: Session, lat: float, lon: float, user: Optional[User] = None) -> Dict[str, Any]:
+        # 1. Reverse geocode to get city name
+        city = await openweather_api.reverse_geocode(lat, lon)
+        if not city:
+            # Fallback to user home city if reverse geocoding fails
+            if user and user.home_city:
+                city = user.home_city
+            else:
+                return {"success": False, "message": "Could not determine city from coordinates and no home city found."}
+
+        # 2. Get weather for that city
+        return await WeatherService.get_current_weather(db, city, user)
+
+    @staticmethod
+    def _format_current_weather(api_data: Dict[str, Any], user: Optional[User] = None) -> Dict[str, Any]:
+        main = api_data.get("main", {})
+        wind = api_data.get("wind", {})
+        weather = api_data.get("weather", [{}])[0]
+        
+        temp_c = main.get("temp")
+        unit = UnitType.CELSIUS
+        if user and user.preferences and user.preferences.unit == UnitType.FAHRENHEIT:
+            unit = UnitType.FAHRENHEIT
+            temp = (temp_c * 9/5) + 32
+        else:
+            temp = temp_c
+
+        theme = get_weather_theme(weather.get("icon", ""))
+        
+        return {
+            "city": api_data.get("name"),
+            "temperature": round(temp, 1),
+            "unit": unit,
+            "humidity": main.get("humidity"),
+            "wind_kph": round(wind.get("speed", 0) * 3.6, 1), # m/s to kph
+            "pressure_mb": main.get("pressure"),
+            "uv_index": 0, # OpenWeather free current API doesn't include UV, requires One Call (paid/limited)
+            "condition": theme["label"],
+            "icon": theme["icon"],
+            "gradient": theme["gradient"],
+            "raw_icon": weather.get("icon")
+        }
+
+    @staticmethod
+    def _aggregate_forecast(api_data: Dict[str, Any], user: Optional[User] = None) -> Dict[str, Any]:
+        # Aggregate 3-hour blocks into daily summaries
+        forecast_list = api_data.get("list", [])
+        daily_data = {}
+        
+        unit = UnitType.CELSIUS
+        if user and user.preferences and user.preferences.unit == UnitType.FAHRENHEIT:
+            unit = UnitType.FAHRENHEIT
+
+        for entry in forecast_list:
+            dt = datetime.fromtimestamp(entry.get("dt"))
+            date_str = dt.strftime("%Y-%m-%d")
+            
+            if date_str not in daily_data:
+                daily_data[date_str] = {
+                    "temps": [],
+                    "humidities": [],
+                    "conditions": [],
+                    "rain_probs": []
+                }
+            
+            main = entry.get("main", {})
+            temp_c = main.get("temp")
+            temp = (temp_c * 9/5) + 32 if unit == UnitType.FAHRENHEIT else temp_c
+            
+            daily_data[date_str]["temps"].append(temp)
+            daily_data[date_str]["humidities"].append(main.get("humidity"))
+            daily_data[date_str]["conditions"].append(entry.get("weather", [{}])[0].get("icon"))
+            daily_data[date_str]["rain_probs"].append(entry.get("pop", 0)) # Probability of precipitation
+
+        summaries = []
+        # Take up to 5 days
+        for date_str, data in list(daily_data.items())[:5]:
+            # Dominant condition (most frequent icon)
+            dom_icon = max(set(data["conditions"]), key=data["conditions"].count)
+            theme = get_weather_theme(dom_icon)
+            
+            summaries.append({
+                "date": date_str,
+                "day": datetime.strptime(date_str, "%Y-%m-%d").strftime("%A"),
+                "min_temp": round(min(data["temps"]), 1),
+                "max_temp": round(max(data["temps"]), 1),
+                "avg_humidity": round(sum(data["humidities"]) / len(data["humidities"]), 1),
+                "condition": theme["label"],
+                "icon": theme["icon"],
+                "rain_prob": round(max(data["rain_probs"]) * 100, 1)
+            })
+            
+        return {
+            "city": api_data.get("city", {}).get("name"),
+            "unit": unit,
+            "forecast": summaries
+        }
+
+    @staticmethod
+    def _update_search_history(db: Session, user_id: int, city: str):
+        try:
+            # Check if city is in ML model
+            ml_available = is_city_in_model(city)
+            
+            # Create new history entry
+            history = SearchHistory(
+                user_id=user_id,
+                city=city,
+                ml_used=ml_available
+            )
+            db.add(history)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Failed to update search history: {e}")
