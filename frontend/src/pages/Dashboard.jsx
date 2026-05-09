@@ -11,30 +11,32 @@ import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 
 export default function Dashboard() {
   const { coordinates, loading: gpsLoading, error: gpsError, permissionDenied } = useGPS();
-  const { data: weatherData, loading: weatherLoading, error: weatherError, staleCache, fetchWeather, fetchForecast, fetchAirQuality } = useWeather();
-  const [forecast, setForecast] = useState([]);
+  const { 
+    data: weatherData, 
+    forecast: forecastData, 
+    loading: weatherLoading, 
+    forecastLoading, 
+    error: weatherError, 
+    staleCache, 
+    fetchWeather, 
+    fetchForecast, 
+    fetchAirQuality 
+  } = useWeather();
+  
   const [airQuality, setAirQuality] = useState(null);
-  const [forecastLoading, setForecastLoading] = useState(false);
 
   useEffect(() => {
     if (coordinates) {
       fetchWeather({ lat: coordinates.lat, lon: coordinates.lon });
     } else if (permissionDenied || gpsError) {
-      // Fallback to a default city or let the user search
-      // For now, let's just wait for weather data to handle the fallback city if implemented in backend
-      fetchWeather({ city: 'Mumbai' }); // Example default fallback
+      fetchWeather({ city: 'Mumbai' });
     }
   }, [coordinates, gpsError, permissionDenied, fetchWeather]);
 
   useEffect(() => {
     if (weatherData?.city) {
-      setForecastLoading(true);
-      fetchForecast(weatherData.city).then(res => {
-        if (res.success) {
-          setForecast(res.data.forecast);
-        }
-        setForecastLoading(false);
-      });
+      // Fetch forecast for the dashboard (not silent prefetch anymore)
+      fetchForecast(weatherData.city, false);
 
       fetchAirQuality(weatherData.city).then(res => {
         if (res.success) {
@@ -60,6 +62,78 @@ export default function Dashboard() {
     { icon: 'eco', label: 'AIR QUALITY (AQI)', value: airQuality?.aqi || '--', trend: 'Live', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
   ] : [];
 
+  const getDynamicInsights = (data) => {
+    const insights = [];
+    
+    if (data.ml_available) {
+      insights.push({
+        icon: 'psychology',
+        iconBg: 'bg-primary/10',
+        title: 'Model Availability',
+        description: `Full prediction support active for ${data.city}.`
+      });
+      insights.push({
+        icon: 'show_chart',
+        iconBg: 'bg-tertiary/10',
+        iconColor: 'text-tertiary',
+        titleColor: 'text-tertiary',
+        title: 'Trends',
+        description: 'Historical patterns are being processed for upcoming predictions.'
+      });
+    } else {
+      // Fallback insights based on current weather
+      if (data.temperature > 30) {
+        insights.push({
+          icon: 'wb_sunny',
+          iconBg: 'bg-orange-500/10',
+          iconColor: 'text-orange-500',
+          title: 'Heat Advisory',
+          description: 'High temperatures detected. Stay hydrated and avoid prolonged sun exposure.'
+        });
+      } else if (data.temperature < 10) {
+        insights.push({
+          icon: 'ac_unit',
+          iconBg: 'bg-blue-500/10',
+          iconColor: 'text-blue-500',
+          title: 'Cold Alert',
+          description: 'Chilly conditions. A warm jacket is recommended for outdoor activities.'
+        });
+      }
+
+      if (data.humidity > 70) {
+        insights.push({
+          icon: 'water_drop',
+          iconBg: 'bg-cyan-500/10',
+          iconColor: 'text-cyan-500',
+          title: 'High Humidity',
+          description: 'It might feel muggier than the actual temperature suggests.'
+        });
+      }
+
+      if (data.wind_kph > 15) {
+        insights.push({
+          icon: 'air',
+          iconBg: 'bg-slate-500/10',
+          iconColor: 'text-slate-500',
+          title: 'Breezy Conditions',
+          description: 'Expect moderate winds today. Good for wind energy, less for umbrellas!'
+        });
+      }
+
+      if (insights.length === 0) {
+        insights.push({
+          icon: 'verified',
+          iconBg: 'bg-green-500/10',
+          iconColor: 'text-green-500',
+          title: 'Ideal Conditions',
+          description: 'The weather looks stable and pleasant for most outdoor activities.'
+        });
+      }
+    }
+    
+    return insights;
+  };
+
   return (
     <>
       <TopBar title="Dashboard" subtitle={weatherData?.city || "Real-Time Overview"} />
@@ -81,7 +155,7 @@ export default function Dashboard() {
               <p className="text-body-md font-medium">
                 {weatherData.ml_available 
                   ? `✨ AI Predictions Available for ${weatherData.city}` 
-                  : `📡 Showing Live API Forecast — AI predictions not yet available for this city`}
+                  : `📡 Clima-Cast Insights Active — Real-time analysis for ${weatherData.city}`}
               </p>
             </div>
           </div>
@@ -126,32 +200,36 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Placeholder for Hourly (Will be hydrated in Phase 6) */}
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <div key={i} className="min-w-[80px] h-24 bg-slate-800/40 rounded-2xl animate-pulse" />
-              ))}
+            {/* Hourly Strip */}
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+              {forecastLoading ? (
+                [1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <div key={i} className="min-w-[96px] h-32 bg-slate-800/40 rounded-2xl animate-pulse" />
+                ))
+              ) : (
+                forecastData?.hourly?.map((h, i) => (
+                  <HourCard 
+                    key={i} 
+                    time={h.time} 
+                    icon={h.icon} 
+                    temperature={`${Math.round(h.temp)}°`}
+                    isActive={i === 0}
+                  />
+                ))
+              )}
             </div>
           </div>
 
-          {/* AI Quick Insights (Placeholder for now) */}
+          {/* AI Quick Insights */}
           <div className="lg:col-span-4 glass-card rounded-3xl p-8 flex flex-col">
             <h4 className="text-h3-card-title text-on-surface mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">auto_awesome</span>
               AI Quick Insights
             </h4>
             <div className="space-y-6 flex-1">
-              {!weatherData?.ml_available ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                  <span className="material-symbols-outlined text-4xl text-slate-600 mb-2">visibility_off</span>
-                  <p className="text-body-sm text-on-surface-variant">Insights are only available for cities supported by our ML model.</p>
-                </div>
-              ) : (
-                <>
-                  <InsightCard icon="psychology" iconBg="bg-primary/10" title="Model Availability" description={`Full prediction support active for ${weatherData.city}.`} />
-                  <InsightCard icon="show_chart" iconBg="bg-tertiary/10" iconColor="text-tertiary" titleColor="text-tertiary" title="Trends" description="Historical patterns are being processed for upcoming predictions." />
-                </>
-              )}
+              {weatherData && getDynamicInsights(weatherData).map((insight, idx) => (
+                <InsightCard key={idx} {...insight} />
+              ))}
             </div>
           </div>
 
@@ -164,15 +242,22 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {forecast.map((f) => (
-                  <div key={f.date} className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30 flex flex-col items-center text-center">
-                    <p className="text-label-caps text-on-surface-variant mb-2">{f.day}</p>
-                    <span className="material-symbols-outlined text-3xl text-primary mb-2">{f.icon}</span>
-                    <p className="text-h3-card-title text-on-surface">{f.max_temp}°</p>
-                    <p className="text-body-sm text-on-surface-variant">{f.min_temp}°</p>
-                    <p className="text-[10px] text-primary/70 mt-2">{f.condition}</p>
-                  </div>
-                ))}
+                {forecastData?.daily?.slice(0, 5).map((f) => {
+                  const formatTemp = (val) => {
+                    if (val === undefined || val === null || isNaN(val)) return '--';
+                    return Number(val).toFixed(0);
+                  };
+                  
+                  return (
+                    <div key={f.date} className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30 flex flex-col items-center text-center">
+                      <p className="text-label-caps text-on-surface-variant mb-2">{f.day || '--'}</p>
+                      <span className="material-symbols-outlined text-3xl text-primary mb-2">{f.icon || 'wb_sunny'}</span>
+                      <p className="text-h3-card-title text-on-surface">{formatTemp(f.max_temp)}°</p>
+                      <p className="text-body-sm text-on-surface-variant">{formatTemp(f.min_temp)}°</p>
+                      <p className="text-[10px] text-primary/70 mt-2">{f.condition || '--'}</p>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

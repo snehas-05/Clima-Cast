@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import api from '../services/api';
 
 export function useWeather() {
   const [data, setData] = useState(null);
+  const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [forecastLoading, setForecastLoading] = useState(false);
   const [error, setError] = useState(null);
   const [staleCache, setStaleCache] = useState(false);
 
@@ -15,22 +15,17 @@ export function useWeather() {
     setStaleCache(false);
 
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      let endpoint = `${API_BASE_URL}/weather/current`;
+      let endpoint = '/weather/current';
       if (params.lat && params.lon) {
-        endpoint = `${API_BASE_URL}/weather/by-coordinates`;
+        endpoint = '/weather/by-coordinates';
       }
 
-      const response = await axios.get(endpoint, {
-        params,
-        headers
-      });
+      const response = await api.get(endpoint, { params });
 
       if (response.data.success) {
         setData(response.data.data);
         setStaleCache(response.data.stale_cache || false);
+        return response.data.data;
       } else {
         setError(response.data.message || "Failed to fetch weather data");
       }
@@ -41,29 +36,30 @@ export function useWeather() {
     }
   }, []);
 
-  const fetchForecast = useCallback(async (city) => {
-    setLoading(true);
+  const fetchForecast = useCallback(async (city, isPrefetch = false) => {
+    if (!isPrefetch) setForecastLoading(true);
+    
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      const response = await axios.get(`${API_BASE_URL}/weather/forecast`, {
-        params: { city },
-        headers
+      const response = await api.get('/weather/forecast', {
+        params: { city }
       });
 
+      if (response.data.success) {
+        if (!isPrefetch) setForecast(response.data.data);
+        return response.data;
+      }
       return response.data;
     } catch (err) {
       console.error("Forecast fetch error:", err);
       return { success: false, message: "Failed to fetch forecast" };
     } finally {
-      setLoading(false);
+      if (!isPrefetch) setForecastLoading(false);
     }
   }, []);
 
   const fetchAirQuality = useCallback(async (city) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/weather/air-quality`, {
+      const response = await api.get('/weather/air-quality', {
         params: { city }
       });
       return response.data;
@@ -73,5 +69,15 @@ export function useWeather() {
     }
   }, []);
 
-  return { data, loading, error, staleCache, fetchWeather, fetchForecast, fetchAirQuality };
+  return { 
+    data, 
+    forecast, 
+    loading, 
+    forecastLoading, 
+    error, 
+    staleCache, 
+    fetchWeather, 
+    fetchForecast, 
+    fetchAirQuality 
+  };
 }

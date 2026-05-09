@@ -9,6 +9,7 @@ class WeatherCache(Base):
     id = Column(Integer, primary_key=True, index=True)
     city = Column(String(100), unique=True, index=True, nullable=False)
     api_data = Column(JSON, nullable=True)
+    forecast_data = Column(JSON, nullable=True)
     ml_prediction = Column(JSON, nullable=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

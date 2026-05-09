@@ -78,25 +78,59 @@ class WeatherService:
 
     @staticmethod
     async def get_forecast(db: Session, city: str, user: Optional[User] = None) -> Dict[str, Any]:
-        # Forecast is less sensitive, but we can still cache it in the same table or a separate one.
-        # For Phase 5, let's use the API directly or simple caching.
-        # OpenWeather /forecast returns 5 days every 3 hours (40 data points).
+        # 1. Check Cache
+        cached = db.query(WeatherCache).filter(WeatherCache.city == city).first()
+        use_cache = False
+        stale_cache = False
+
+        if cached and cached.forecast_data and not is_cache_expired(cached.updated_at):
+            use_cache = True
+            logger.info(f"Using valid forecast cache for city: {city}")
         
-        try:
-            api_data = await openweather_api.get_forecast(city)
-            if not api_data:
-                return {"success": False, "message": f"Could not fetch forecast for {city}"}
-            
-            forecast_data = WeatherService._aggregate_forecast(api_data, user)
-            
-            return {
-                "success": True,
-                "message": "Forecast fetched successfully",
-                "data": forecast_data
-            }
-        except Exception as e:
-            logger.error(f"Error fetching forecast: {e}")
-            return {"success": False, "message": str(e)}
+        # 2. Call API if cache invalid or missing
+        api_data = None
+        if not use_cache:
+            try:
+                api_data = await openweather_api.get_forecast(city)
+                if api_data:
+                    # Update cache
+                    if cached:
+                        cached.forecast_data = api_data
+                        cached.updated_at = datetime.now()
+                    else:
+                        new_cache = WeatherCache(city=city, forecast_data=api_data)
+                        db.add(new_cache)
+                    db.commit()
+                else:
+                    if cached and cached.forecast_data:
+                        stale_cache = True
+                        api_data = cached.forecast_data
+                        logger.warning(f"Forecast API failed, using stale cache for city: {city}")
+            except Exception as e:
+                if cached and cached.forecast_data:
+                    stale_cache = True
+                    api_data = cached.forecast_data
+                    logger.warning(f"Forecast API error, using stale cache for city: {city}")
+                else:
+                    logger.error(f"Error fetching forecast: {e}")
+                    return {"success": False, "message": f"Could not fetch forecast for {city}", "error": str(e)}
+
+        if not api_data and cached and cached.forecast_data:
+            api_data = cached.forecast_data
+            stale_cache = True
+        
+        if not api_data:
+            return {"success": False, "message": f"Could not fetch forecast for {city}", "error": "API Failure"}
+
+        # 3. Format Response
+        forecast_data = WeatherService._aggregate_forecast(api_data, user)
+        
+        return {
+            "success": True,
+            "message": "Forecast fetched successfully",
+            "data": forecast_data,
+            "stale_cache": stale_cache
+        }
 
     @staticmethod
     async def get_by_coordinates(db: Session, lat: float, lon: float, user: Optional[User] = None) -> Dict[str, Any]:
@@ -177,12 +211,14 @@ class WeatherService:
     def _aggregate_forecast(api_data: Dict[str, Any], user: Optional[User] = None) -> Dict[str, Any]:
         # Aggregate 3-hour blocks into daily summaries
         forecast_list = api_data.get("list", [])
+        city_info = api_data.get("city", {})
         daily_data = {}
         
         unit = UnitType.CELSIUS
         if user and user.preferences and user.preferences.unit == UnitType.FAHRENHEIT:
             unit = UnitType.FAHRENHEIT
 
+        # 1. Process Raw Data for daily grouping
         for entry in forecast_list:
             dt = datetime.fromtimestamp(entry.get("dt"))
             date_str = dt.strftime("%Y-%m-%d")
@@ -202,30 +238,72 @@ class WeatherService:
             daily_data[date_str]["temps"].append(temp)
             daily_data[date_str]["humidities"].append(main.get("humidity"))
             daily_data[date_str]["conditions"].append(entry.get("weather", [{}])[0].get("icon"))
-            daily_data[date_str]["rain_probs"].append(entry.get("pop", 0)) # Probability of precipitation
+            daily_data[date_str]["rain_probs"].append(entry.get("pop", 0))
 
-        summaries = []
-        # Take up to 5 days
-        for date_str, data in list(daily_data.items())[:5]:
+        # 2. Generate Hourly Strip Data (Next 24-36 hours)
+        hourly_strip = []
+        for entry in forecast_list[:12]: # Next 36 hours
+            dt = datetime.fromtimestamp(entry.get("dt"))
+            main = entry.get("main", {})
+            weather = entry.get("weather", [{}])[0]
+            temp_c = main.get("temp")
+            temp = (temp_c * 9/5) + 32 if unit == UnitType.FAHRENHEIT else temp_c
+            
+            theme = get_weather_theme(weather.get("icon", ""))
+            
+            hourly_strip.append({
+                "time": dt.strftime("%I %p").lstrip('0'),
+                "temp": round(temp, 1),
+                "condition": theme["label"],
+                "icon": theme["icon"],
+                "raw_icon": weather.get("icon")
+            })
+
+        # 3. Generate Daily Summaries
+        daily_summaries = []
+        for date_str, data in list(daily_data.items()):
             # Dominant condition (most frequent icon)
             dom_icon = max(set(data["conditions"]), key=data["conditions"].count)
             theme = get_weather_theme(dom_icon)
             
-            summaries.append({
+            daily_summaries.append({
                 "date": date_str,
                 "day": datetime.strptime(date_str, "%Y-%m-%d").strftime("%A"),
+                "short_day": datetime.strptime(date_str, "%Y-%m-%d").strftime("%a"),
                 "min_temp": round(min(data["temps"]), 1),
                 "max_temp": round(max(data["temps"]), 1),
-                "avg_humidity": round(sum(data["humidities"]) / len(data["humidities"]), 1),
                 "condition": theme["label"],
                 "icon": theme["icon"],
-                "rain_prob": round(max(data["rain_probs"]) * 100, 1)
+                "raw_icon": dom_icon,
+                "rain_probability": round(sum(data["rain_probs"]) / len(data["rain_probs"]) * 100, 1) # Average pop
             })
+
+        # 4. Generate Today Summary
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        # Find the day data for today or the first available day
+        today_data = daily_data.get(today_str, list(daily_data.values())[0])
+        
+        # Current feels like and description from first block
+        first_block = forecast_list[0] if forecast_list else {}
+        feels_like_c = first_block.get("main", {}).get("feels_like", 0)
+        feels_like = (feels_like_c * 9/5) + 32 if unit == UnitType.FAHRENHEIT else feels_like_c
+
+        today_summary = {
+            "high": round(max(today_data["temps"]), 1),
+            "low": round(min(today_data["temps"]), 1),
+            "feels_like": round(feels_like, 1),
+            "sunrise": datetime.fromtimestamp(city_info.get("sunrise", 0)).strftime("%I:%M %p").lstrip('0'),
+            "sunset": datetime.fromtimestamp(city_info.get("sunset", 0)).strftime("%I:%M %p").lstrip('0'),
+            "condition": daily_summaries[0]["condition"],
+            "description": first_block.get("weather", [{}])[0].get("description", "").title()
+        }
             
         return {
-            "city": api_data.get("city", {}).get("name"),
+            "city": city_info.get("name"),
             "unit": unit,
-            "forecast": summaries
+            "today": today_summary,
+            "hourly": hourly_strip,
+            "daily": daily_summaries
         }
 
     @staticmethod
