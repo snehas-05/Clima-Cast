@@ -48,6 +48,14 @@ async def get_supported_cities_list():
         "cities": cities
     }
 
+@router.get("/air-quality")
+async def get_air_quality(
+    city: str = Query(..., description="City name"),
+    db: Session = Depends(get_db)
+):
+    """Fetch air quality index and pollutant data for a city."""
+    return await WeatherService.get_air_quality(db, city)
+
 @router.get("/check-city")
 async def check_city_support(city: str = Query(...)):
     """Check if a specific city is supported by the ML model."""

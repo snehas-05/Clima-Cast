@@ -61,5 +61,17 @@ export function useWeather() {
     }
   }, []);
 
-  return { data, loading, error, staleCache, fetchWeather, fetchForecast };
+  const fetchAirQuality = useCallback(async (city) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/weather/air-quality`, {
+        params: { city }
+      });
+      return response.data;
+    } catch (err) {
+      console.error("Air Quality fetch error:", err);
+      return { success: false, message: "Failed to fetch air quality" };
+    }
+  }, []);
+
+  return { data, loading, error, staleCache, fetchWeather, fetchForecast, fetchAirQuality };
 }

@@ -51,7 +51,8 @@ class WeatherService:
                     api_data = cached.api_data
                     logger.warning(f"API error, using stale cache for city: {city}")
                 else:
-                    raise e
+                    logger.error(f"Error fetching current weather: {e}")
+                    return {"success": False, "message": f"Could not fetch weather for {city}", "error": str(e)}
 
         if not api_data and cached:
             api_data = cached.api_data
@@ -110,6 +111,37 @@ class WeatherService:
 
         # 2. Get weather for that city
         return await WeatherService.get_current_weather(db, city, user)
+
+    @staticmethod
+    async def get_air_quality(db: Session, city: str) -> Dict[str, Any]:
+        try:
+            # Resolve city to coords
+            coords = await openweather_api.get_city_coords(city)
+            if not coords:
+                return {"success": False, "message": f"Could not find coordinates for {city}"}
+            
+            aqi_data = await openweather_api.get_air_quality(coords["lat"], coords["lon"])
+            if not aqi_data or not aqi_data.get("list"):
+                return {"success": False, "message": "Failed to fetch air quality data"}
+            
+            list_data = aqi_data["list"][0]
+            components = list_data.get("components", {})
+            
+            return {
+                "success": True,
+                "message": "Air quality fetched successfully",
+                "data": {
+                    "city": city,
+                    "aqi": list_data.get("main", {}).get("aqi"),
+                    "pm2_5": components.get("pm2_5"),
+                    "no2": components.get("no2"),
+                    "o3": components.get("o3"),
+                    "so2": components.get("so2")
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error fetching air quality: {e}")
+            return {"success": False, "message": str(e)}
 
     @staticmethod
     def _format_current_weather(api_data: Dict[str, Any], user: Optional[User] = None) -> Dict[str, Any]:

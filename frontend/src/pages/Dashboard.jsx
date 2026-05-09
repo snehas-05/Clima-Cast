@@ -11,8 +11,9 @@ import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 
 export default function Dashboard() {
   const { coordinates, loading: gpsLoading, error: gpsError, permissionDenied } = useGPS();
-  const { data: weatherData, loading: weatherLoading, error: weatherError, staleCache, fetchWeather, fetchForecast } = useWeather();
+  const { data: weatherData, loading: weatherLoading, error: weatherError, staleCache, fetchWeather, fetchForecast, fetchAirQuality } = useWeather();
   const [forecast, setForecast] = useState([]);
+  const [airQuality, setAirQuality] = useState(null);
   const [forecastLoading, setForecastLoading] = useState(false);
 
   useEffect(() => {
@@ -34,8 +35,14 @@ export default function Dashboard() {
         }
         setForecastLoading(false);
       });
+
+      fetchAirQuality(weatherData.city).then(res => {
+        if (res.success) {
+          setAirQuality(res.data);
+        }
+      });
     }
-  }, [weatherData?.city, fetchForecast]);
+  }, [weatherData?.city, fetchForecast, fetchAirQuality]);
 
   if (gpsLoading || (weatherLoading && !weatherData)) {
     return (
@@ -50,6 +57,7 @@ export default function Dashboard() {
     { icon: 'water_drop', label: 'HUMIDITY', value: `${weatherData.humidity}%`, trend: 'Normal', iconBg: 'bg-secondary/10', iconColor: 'text-secondary' },
     { icon: 'air', label: 'WIND SPEED', value: `${weatherData.wind_kph} km/h`, trend: 'Stable' },
     { icon: 'compress', label: 'PRESSURE', value: `${weatherData.pressure_mb} mb`, trend: 'Stable', iconBg: 'bg-tertiary/10', iconColor: 'text-tertiary' },
+    { icon: 'eco', label: 'AIR QUALITY (AQI)', value: airQuality?.aqi || '--', trend: 'Live', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
   ] : [];
 
   return (
@@ -87,7 +95,7 @@ export default function Dashboard() {
         )}
 
         {/* Metrics Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[var(--spacing-card-gap)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[var(--spacing-card-gap)]">
           {metrics.map((m) => <MetricCard key={m.label} {...m} />)}
         </div>
 
