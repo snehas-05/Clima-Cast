@@ -7,9 +7,14 @@ from sqlalchemy import text
 
 from app.database.connection import engine, get_db
 from app.database.base import Base
-from app.routes import auth, weather
+from app.routes import auth, weather, predict
 from app.utils.city_checker import get_supported_cities
-import app.models  # Ensure models are imported for Base.metadata
+from app.ml.model_loader import load_models
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+from app.routes.predict import limiter
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +28,9 @@ async def lifespan(app: FastAPI):
         logger.info("Database tables created successfully")
     except Exception as e:
         logger.error(f"Error creating database tables: {e}")
+
+    # Load ML models
+    load_models()
 
     # Load supported cities into cache
     get_supported_cities()
@@ -41,6 +49,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# SlowAPI Rate Limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +68,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(weather.router, prefix="/weather", tags=["Weather"])
+app.include_router(predict.router, prefix="/predict", tags=["AI Predictions"])
 
 @app.get("/", tags=["Health"])
 async def root():

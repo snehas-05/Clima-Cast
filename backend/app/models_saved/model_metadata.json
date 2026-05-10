@@ -1,0 +1,13 @@
+{
+    "rain_model_version": "v1",
+    "temp_model_version": "v1",
+    "trend_model_version": "v1",
+    "humidity_model_version": "v1",
+    "alert_model_version": "v1",
+    "trained_at": "2026-05-10T17:13:43.395752",
+    "datasets": {
+        "global": "processed_global.csv",
+        "rain": "processed_rain.csv",
+        "history": "processed_history.csv"
+    }
+}
