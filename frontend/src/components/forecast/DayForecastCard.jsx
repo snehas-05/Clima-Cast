@@ -1,6 +1,5 @@
-import React from 'react';
-import WeatherIcon from './WeatherIcon';
-import RainProbabilityBar from './RainProbabilityBar';
+import { usePreferences } from '../../context/PreferencesContext';
+import { formatTemp } from '../../utils/temperature';
 
 const DayForecastCard = ({ 
   date, 
@@ -9,14 +8,9 @@ const DayForecastCard = ({
   condition, 
   max_temp, 
   min_temp, 
-  rain_probability, 
-  unit 
+  rain_probability 
 }) => {
-  // Safe formatting helpers
-  const formatTemp = (val) => {
-    if (val === undefined || val === null || isNaN(val)) return '--';
-    return Number(val).toFixed(0);
-  };
+  const { unit } = usePreferences();
 
   const formatRain = (val) => {
     if (val === undefined || val === null || isNaN(val)) return 0;
@@ -35,10 +29,10 @@ const DayForecastCard = ({
 
       <div className="flex flex-col gap-1 mb-4">
         <span className="text-2xl font-bold text-on-surface tracking-tight">
-          {formatTemp(max_temp)}°
+          {formatTemp(max_temp, unit)}°
         </span>
         <span className="text-sm text-on-surface-variant font-medium">
-          {formatTemp(min_temp)}°
+          {formatTemp(min_temp, unit)}°
         </span>
       </div>
 

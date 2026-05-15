@@ -5,6 +5,11 @@ import './index.css';
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext';
 
+// --- EARLY THEME HYDRATION ---
+const savedTheme = localStorage.getItem("theme") || "dark";
+document.body.classList.add(savedTheme);
+// ----------------------------
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>

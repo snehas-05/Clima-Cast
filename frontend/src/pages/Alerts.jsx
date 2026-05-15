@@ -1,23 +1,47 @@
+import { useEffect, useState } from 'react';
 import TopBar from '../components/layout/TopBar';
 import Button from '../components/ui/Button';
 import AlertCard from '../components/cards/AlertCard';
-
-const stats = [
-  { label: 'Active Emergencies', value: '02', severity: 'Emergency', border: 'border-error', badge: 'bg-error/5 text-error', iconBg: 'bg-error/10 text-error', icon: 'emergency_home' },
-  { label: 'Watch Notifications', value: '14', severity: 'Advisory', border: 'border-tertiary', badge: 'bg-tertiary/5 text-tertiary', iconBg: 'bg-tertiary/10 text-tertiary', icon: 'warning' },
-  { label: 'Global Stability Score', value: '88%', severity: 'Safe', border: 'border-primary', badge: 'bg-primary/5 text-primary', iconBg: 'bg-primary/10 text-primary', icon: 'verified_user' },
-];
-
-const alertsList = [
-  { severity: 'emergency', severityLabel: 'Emergency', icon: 'campaign', title: 'Severe Flood Warning', location: 'Miami-Dade County, FL', description: 'Life-threatening storm surge expected within 6 hours. Evacuation orders in effect for Zone A.', actionText: 'Action Required Now', expiresIn: 'Expires in 4h 22m' },
-  { severity: 'warning', severityLabel: 'Warning', icon: 'wind_power', title: 'High Wind Advisory', location: 'Chicago Metro Area, IL', description: 'Sustained winds of 45mph with gusts up to 70mph. Damage to trees and power lines highly probable.', actionText: 'Exercise Caution', expiresIn: 'Expires in 12h 00m' },
-  { severity: 'watch', severityLabel: 'Watch', icon: 'snowing', title: 'Winter Weather Watch', location: 'Denver, CO', description: 'Potential for significant snow accumulation starting Thursday evening. Travel delays likely.', actionText: 'Monitoring Situation', expiresIn: 'Expires in 3d 12h' },
-];
+import { useWeather } from '../hooks/useWeather';
+import api from '../services/api';
 
 export default function Alerts() {
+  const { data: weatherData } = useWeather();
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      if (!weatherData?.city) return;
+      
+      try {
+        setLoading(true);
+        const response = await api.get(`/alerts/active?city=${weatherData.city}`);
+        setAlerts(response.data.alerts);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching alerts:', err);
+        setError('Failed to load real-time alerts. Showing fallback intelligence.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 60000); // Refresh every minute
+    return () => clearInterval(interval);
+  }, [weatherData?.city]);
+
+  const stats = [
+    { label: 'Active Alerts', value: alerts.length.toString().padStart(2, '0'), severity: alerts.length > 0 ? 'Action Needed' : 'Safe', border: alerts.length > 0 ? 'border-error' : 'border-primary', badge: alerts.length > 0 ? 'bg-error/5 text-error' : 'bg-primary/5 text-primary', iconBg: alerts.length > 0 ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary', icon: alerts.length > 0 ? 'emergency_home' : 'verified_user' },
+    { label: 'Watch Notifications', value: '04', severity: 'Advisory', border: 'border-tertiary', badge: 'bg-tertiary/5 text-tertiary', iconBg: 'bg-tertiary/10 text-tertiary', icon: 'warning' },
+    { label: 'Global Stability Score', value: '92%', severity: 'Safe', border: 'border-primary', badge: 'bg-primary/5 text-primary', iconBg: 'bg-primary/10 text-primary', icon: 'verified_user' },
+  ];
+
   return (
     <>
-      <TopBar title="Alerts Intelligence" />
+      <TopBar title="Alerts Intelligence" subtitle={weatherData?.city || "Global Feed"} />
       <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]">
         
         {/* Stats Row */}
@@ -42,12 +66,12 @@ export default function Alerts() {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--spacing-card-gap)]">
           
           <div className="lg:col-span-8 flex flex-col gap-[var(--spacing-card-gap)]">
-            {/* Risk Map */}
+            {/* Risk Map (Static Demo) */}
             <div className="glass-card rounded-3xl overflow-hidden flex flex-col h-[500px]">
               <div className="p-6 flex justify-between items-center border-b border-outline-variant/20">
                 <div>
                   <h3 className="text-h3-card-title text-on-surface">Interactive Risk Mapping</h3>
-                  <p className="text-sm text-on-surface-variant">Real-time threat visualization across North America</p>
+                  <p className="text-sm text-on-surface-variant">Real-time threat visualization for {weatherData?.city || 'Selected Region'}</p>
                 </div>
                 <div className="flex bg-surface-container rounded-lg p-1">
                   <button className="px-3 py-1.5 rounded-md bg-white shadow-sm text-xs font-bold text-primary">Flood</button>
@@ -64,7 +88,7 @@ export default function Alerts() {
                 <div className="absolute bottom-6 right-6 flex flex-col gap-2">
                   <div className="glass-card p-3 rounded-xl flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full bg-error animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-on-surface">Live Feed: Tracking Delta-9</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-on-surface">Live Feed: {weatherData?.city || 'Tracking Atmosphere'}</span>
                   </div>
                 </div>
               </div>
@@ -77,26 +101,31 @@ export default function Alerts() {
                 Storm Tracking Updates
               </h3>
               <div className="space-y-6">
-                <div className="flex items-start gap-4 pb-6 border-b border-outline-variant/20">
-                  <div className="mt-1 w-2 h-2 rounded-full bg-primary ring-4 ring-primary/10" />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-bold text-on-surface">Cyclone 'Echo' Upgraded to Cat 3</span>
-                      <span className="text-xs font-medium text-on-surface-variant">12m ago</span>
+                {alerts.length > 0 ? (
+                  alerts.map((alert, idx) => (
+                    <div key={idx} className="flex items-start gap-4 pb-6 border-b border-outline-variant/20 last:border-0 last:pb-0">
+                      <div className={`mt-1 w-2 h-2 rounded-full ${alert.severity === 'extreme' ? 'bg-error ring-4 ring-error/10' : 'bg-primary ring-4 ring-primary/10'}`} />
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-on-surface">{alert.label}</span>
+                          <span className="text-xs font-medium text-on-surface-variant">Live</span>
+                        </div>
+                        <p className="text-sm text-on-surface-variant leading-relaxed">{alert.explanation}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">Central pressure dropped to 954mb. Rapid intensification observed in the last 3 hours. Predictive AI suggests a landfall shift 15 miles North-East of previous projections.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 w-2 h-2 rounded-full bg-outline" />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-bold text-on-surface">Atmospheric River System: West Coast</span>
-                      <span className="text-xs font-medium text-on-surface-variant">2h ago</span>
+                  ))
+                ) : (
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 w-2 h-2 rounded-full bg-outline" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-bold text-on-surface">No immediate storm threats detected</span>
+                        <span className="text-xs font-medium text-on-surface-variant">Now</span>
+                      </div>
+                      <p className="text-sm text-on-surface-variant leading-relaxed">Atmospheric conditions are currently stable for {weatherData?.city || 'your region'}. ML models continue to monitor for rapid changes.</p>
                     </div>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">Moderate moisture transport identified. Risk of urban flooding in low-lying coastal sectors elevated by 25% for the next 48-hour window.</p>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -104,13 +133,26 @@ export default function Alerts() {
           {/* Active Warnings Sidebar */}
           <div className="lg:col-span-4 flex flex-col gap-[var(--spacing-card-gap)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-h3-card-title text-on-surface">Active Warnings</h3>
-              <span className="text-xs text-label-caps text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">Sort by Severity</span>
+              <h3 className="text-h3-card-title text-on-surface">Live ML Alerts</h3>
+              <span className="text-xs text-label-caps text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">
+                {loading ? 'Analyzing...' : `${alerts.length} Active`}
+              </span>
             </div>
             <div className="space-y-4">
-              {alertsList.map((alert, i) => <AlertCard key={i} {...alert} />)}
+              {loading ? (
+                [1, 2].map(i => <div key={i} className="h-48 glass-card rounded-3xl animate-pulse" />)
+              ) : alerts.length > 0 ? (
+                alerts.map((alert, i) => <AlertCard key={i} {...alert} />)
+              ) : (
+                <div className="glass-card p-8 rounded-3xl text-center space-y-4">
+                  <span className="material-symbols-outlined text-4xl text-primary opacity-50">verified</span>
+                  <h4 className="font-bold text-on-surface">Atmosphere is Clear</h4>
+                  <p className="text-xs text-on-surface-variant">No dangerous thresholds exceeded. AI monitoring is active for temperature, wind, and humidity spikes.</p>
+                </div>
+              )}
+              {error && <p className="text-xs text-error font-bold text-center">{error}</p>}
               <button className="w-full py-4 text-primary font-bold text-sm bg-primary/5 rounded-2xl border border-primary/10 hover:bg-primary/10 transition-colors">
-                View All 16 Active Alerts
+                View Alert History
               </button>
             </div>
           </div>

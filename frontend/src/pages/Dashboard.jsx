@@ -3,20 +3,20 @@ import TopBar from '../components/layout/TopBar';
 import MetricCard from '../components/cards/MetricCard';
 import HourCard from '../components/cards/HourCard';
 import InsightCard from '../components/cards/InsightCard';
-import ForecastRow from '../components/cards/ForecastRow';
-import ChartContainer from '../components/charts/ChartContainer';
 import { useGPS } from '../hooks/useGPS';
 import { useWeather } from '../hooks/useWeather';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
+import { usePreferences } from '../context/PreferencesContext';
+import { formatTemp } from '../utils/temperature';
 
 export default function Dashboard() {
+  const { unit } = usePreferences();
   const { coordinates, loading: gpsLoading, error: gpsError, permissionDenied } = useGPS();
   const { 
     data: weatherData, 
     forecast: forecastData, 
     loading: weatherLoading, 
     forecastLoading, 
-    error: weatherError, 
     staleCache, 
     fetchWeather, 
     fetchForecast, 
@@ -35,9 +35,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (weatherData?.city) {
-      // Fetch forecast for the dashboard (not silent prefetch anymore)
       fetchForecast(weatherData.city, false);
-
       fetchAirQuality(weatherData.city).then(res => {
         if (res.success) {
           setAirQuality(res.data);
@@ -55,7 +53,7 @@ export default function Dashboard() {
   }
 
   const metrics = weatherData ? [
-    { icon: 'device_thermostat', label: 'TEMPERATURE', value: `${weatherData.temperature}°${weatherData.unit === 'fahrenheit' ? 'F' : 'C'}`, trend: 'Live' },
+    { icon: 'device_thermostat', label: 'TEMPERATURE', value: `${formatTemp(weatherData.temperature, unit)}°`, trend: 'Live' },
     { icon: 'water_drop', label: 'HUMIDITY', value: `${weatherData.humidity}%`, trend: 'Normal', iconBg: 'bg-secondary/10', iconColor: 'text-secondary' },
     { icon: 'air', label: 'WIND SPEED', value: `${weatherData.wind_kph} km/h`, trend: 'Stable' },
     { icon: 'compress', label: 'PRESSURE', value: `${weatherData.pressure_mb} mb`, trend: 'Stable', iconBg: 'bg-tertiary/10', iconColor: 'text-tertiary' },
@@ -64,73 +62,15 @@ export default function Dashboard() {
 
   const getDynamicInsights = (data) => {
     const insights = [];
-    
     if (data.ml_available) {
-      insights.push({
-        icon: 'psychology',
-        iconBg: 'bg-primary/10',
-        title: 'Model Availability',
-        description: `Full prediction support active for ${data.city}.`
-      });
-      insights.push({
-        icon: 'show_chart',
-        iconBg: 'bg-tertiary/10',
-        iconColor: 'text-tertiary',
-        titleColor: 'text-tertiary',
-        title: 'Trends',
-        description: 'Historical patterns are being processed for upcoming predictions.'
-      });
+      insights.push({ icon: 'psychology', iconBg: 'bg-primary/10', title: 'Model Availability', description: `Full prediction support active for ${data.city}.` });
+      insights.push({ icon: 'show_chart', iconBg: 'bg-tertiary/10', iconColor: 'text-tertiary', titleColor: 'text-tertiary', title: 'Trends', description: 'Historical patterns are being processed for upcoming predictions.' });
     } else {
-      // Fallback insights based on current weather
-      if (data.temperature > 30) {
-        insights.push({
-          icon: 'wb_sunny',
-          iconBg: 'bg-orange-500/10',
-          iconColor: 'text-orange-500',
-          title: 'Heat Advisory',
-          description: 'High temperatures detected. Stay hydrated and avoid prolonged sun exposure.'
-        });
-      } else if (data.temperature < 10) {
-        insights.push({
-          icon: 'ac_unit',
-          iconBg: 'bg-blue-500/10',
-          iconColor: 'text-blue-500',
-          title: 'Cold Alert',
-          description: 'Chilly conditions. A warm jacket is recommended for outdoor activities.'
-        });
-      }
-
-      if (data.humidity > 70) {
-        insights.push({
-          icon: 'water_drop',
-          iconBg: 'bg-cyan-500/10',
-          iconColor: 'text-cyan-500',
-          title: 'High Humidity',
-          description: 'It might feel muggier than the actual temperature suggests.'
-        });
-      }
-
-      if (data.wind_kph > 15) {
-        insights.push({
-          icon: 'air',
-          iconBg: 'bg-slate-500/10',
-          iconColor: 'text-slate-500',
-          title: 'Breezy Conditions',
-          description: 'Expect moderate winds today. Good for wind energy, less for umbrellas!'
-        });
-      }
-
-      if (insights.length === 0) {
-        insights.push({
-          icon: 'verified',
-          iconBg: 'bg-green-500/10',
-          iconColor: 'text-green-500',
-          title: 'Ideal Conditions',
-          description: 'The weather looks stable and pleasant for most outdoor activities.'
-        });
-      }
+      if (data.temperature > 30) insights.push({ icon: 'wb_sunny', iconBg: 'bg-orange-500/10', iconColor: 'text-orange-500', title: 'Heat Advisory', description: 'High temperatures detected. Stay hydrated.' });
+      else if (data.temperature < 10) insights.push({ icon: 'ac_unit', iconBg: 'bg-blue-500/10', iconColor: 'text-blue-500', title: 'Cold Alert', description: 'Chilly conditions. Wear a jacket.' });
+      
+      if (insights.length === 0) insights.push({ icon: 'verified', iconBg: 'bg-green-500/10', iconColor: 'text-green-500', title: 'Ideal Conditions', description: 'The weather looks stable and pleasant.' });
     }
-    
     return insights;
   };
 
@@ -140,7 +80,6 @@ export default function Dashboard() {
       
       <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]">
         
-        {/* Alerts / Banners */}
         {staleCache && (
           <div className="bg-yellow-500/20 border border-yellow-500/50 text-yellow-200 px-6 py-3 rounded-2xl flex items-center gap-3">
             <span className="material-symbols-outlined">history</span>
@@ -161,30 +100,19 @@ export default function Dashboard() {
           </div>
         )}
 
-        {permissionDenied && !weatherData && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl flex items-center gap-3">
-            <span className="material-symbols-outlined">location_off</span>
-            <p className="text-body-md">Location permission denied. Showing fallback weather. You can search for your city above.</p>
-          </div>
-        )}
-
-        {/* Metrics Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[var(--spacing-card-gap)]">
           {metrics.map((m) => <MetricCard key={m.label} {...m} />)}
         </div>
 
-        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--spacing-card-gap)]">
-          {/* Main Weather Card */}
           <div className={`lg:col-span-8 glass-card rounded-3xl p-8 flex flex-col relative overflow-hidden`}>
-            {/* Background Gradient Accent */}
             <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${weatherData?.gradient || 'from-primary/20 to-transparent'} blur-3xl opacity-30 -mr-20 -mt-20`} />
             
             <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8 relative z-10">
               <div>
                 <p className="text-label-caps text-on-surface-variant mb-1">CURRENT CONDITIONS</p>
                 <h3 className="text-h1-hero text-on-surface leading-none">
-                  {weatherData ? `${weatherData.temperature}°${weatherData.unit === 'fahrenheit' ? 'F' : 'C'}` : '--'}
+                  {weatherData ? `${formatTemp(weatherData.temperature, unit)}°` : '--'}
                 </h3>
                 <p className="text-body-lg text-on-surface-variant mt-2">
                   {weatherData ? `${weatherData.condition} • ${weatherData.city}` : 'Fetching weather...'}
@@ -200,7 +128,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Hourly Strip */}
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {forecastLoading ? (
                 [1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -212,7 +139,7 @@ export default function Dashboard() {
                     key={i} 
                     time={h.time} 
                     icon={h.icon} 
-                    temperature={`${Math.round(h.temp)}°`}
+                    temp={h.temp}
                     isActive={i === 0}
                   />
                 ))
@@ -220,7 +147,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* AI Quick Insights */}
           <div className="lg:col-span-4 glass-card rounded-3xl p-8 flex flex-col">
             <h4 className="text-h3-card-title text-on-surface mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">auto_awesome</span>
@@ -233,7 +159,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 5-Day Forecast */}
           <div className="lg:col-span-12 glass-card rounded-3xl p-8">
             <h4 className="text-h3-card-title text-on-surface mb-6">5-Day Forecast</h4>
             {forecastLoading ? (
@@ -242,22 +167,15 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {forecastData?.daily?.slice(0, 5).map((f) => {
-                  const formatTemp = (val) => {
-                    if (val === undefined || val === null || isNaN(val)) return '--';
-                    return Number(val).toFixed(0);
-                  };
-                  
-                  return (
-                    <div key={f.date} className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30 flex flex-col items-center text-center">
-                      <p className="text-label-caps text-on-surface-variant mb-2">{f.day || '--'}</p>
-                      <span className="material-symbols-outlined text-3xl text-primary mb-2">{f.icon || 'wb_sunny'}</span>
-                      <p className="text-h3-card-title text-on-surface">{formatTemp(f.max_temp)}°</p>
-                      <p className="text-body-sm text-on-surface-variant">{formatTemp(f.min_temp)}°</p>
-                      <p className="text-[10px] text-primary/70 mt-2">{f.condition || '--'}</p>
-                    </div>
-                  );
-                })}
+                {forecastData?.daily?.slice(0, 5).map((f) => (
+                  <div key={f.date} className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30 flex flex-col items-center text-center">
+                    <p className="text-label-caps text-on-surface-variant mb-2">{f.day || '--'}</p>
+                    <span className="material-symbols-outlined text-3xl text-primary mb-2">{f.icon || 'wb_sunny'}</span>
+                    <p className="text-h3-card-title text-on-surface">{formatTemp(f.max_temp, unit)}°</p>
+                    <p className="text-body-sm text-on-surface-variant">{formatTemp(f.min_temp, unit)}°</p>
+                    <p className="text-[10px] text-primary/70 mt-2">{f.condition || '--'}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>

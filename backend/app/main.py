@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 from app.database.connection import engine, get_db
 from app.database.base import Base
-from app.routes import auth, weather, predict, analytics
+from app.routes import auth, weather, predict, analytics, alerts, user, settings
 from app.utils.city_checker import get_supported_cities
 from app.ml.model_loader import load_models
 from slowapi import _rate_limit_exceeded_handler
@@ -70,6 +70,9 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(weather.router, prefix="/weather", tags=["Weather"])
 app.include_router(predict.router, prefix="/predict", tags=["AI Predictions"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
+app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
+app.include_router(user.router, prefix="/user", tags=["User"])
+app.include_router(settings.router, prefix="/settings", tags=["Settings"])
 
 @app.get("/", tags=["Health"])
 async def root():

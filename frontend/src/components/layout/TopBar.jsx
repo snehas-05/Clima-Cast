@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import IconButton from '../ui/IconButton';
-import { useAuth } from '../../hooks/useAuth';
+import UnitToggle from '../ui/UnitToggle';
+import ThemeToggle from '../ui/ThemeToggle';
 
 export default function TopBar({ title, subtitle, children }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,17 +12,25 @@ export default function TopBar({ title, subtitle, children }) {
         {/* Left: Title + optional subtitle */}
         <div className="flex items-center gap-8">
           <div>
-            <h2 className="text-h2-dashboard text-primary">{title}</h2>
+            <h2 className="text-h2-dashboard text-primary truncate max-w-[200px] sm:max-w-none">{title}</h2>
             {subtitle && (
-              <p className="text-label-caps text-on-surface-variant/60">{subtitle}</p>
+              <p className="text-label-caps text-on-surface-variant/60 text-[10px] sm:text-xs">{subtitle}</p>
             )}
           </div>
         </div>
 
         {/* Right: Search + actions */}
         <div className="flex items-center gap-4 relative">
+          {/* Unit Toggle */}
+          <div className="hidden lg:block">
+            <UnitToggle />
+          </div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Search */}
-          <div className="relative group hidden md:block">
+          <div className="relative group hidden xl:block">
             <span className="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary">
               <span className="material-symbols-outlined">search</span>
             </span>
@@ -31,8 +38,8 @@ export default function TopBar({ title, subtitle, children }) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-surface-container-low border-none rounded-full py-2.5 pl-10 pr-6 w-64 lg:w-80 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60"
-              placeholder="Search atmospheric data..."
+              className="bg-surface-container-low border-none rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60"
+              placeholder="Search data..."
             />
           </div>
 

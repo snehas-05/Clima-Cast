@@ -1,4 +1,10 @@
-export default function HourCard({ time, icon, temperature, isActive = false, iconStyle }) {
+import React from 'react';
+import { usePreferences } from '../../context/PreferencesContext';
+import { formatTemp } from '../../utils/temperature';
+
+export default function HourCard({ time, icon, temp, isActive = false, iconStyle }) {
+  const { unit } = usePreferences();
+  
   return (
     <div
       className={`flex-shrink-0 w-24 flex flex-col items-center p-4 rounded-2xl transition-all duration-300
@@ -17,7 +23,7 @@ export default function HourCard({ time, icon, temperature, isActive = false, ic
         {icon}
       </span>
       <p className={`text-h3-card-title font-bold ${isActive ? 'text-primary' : 'text-on-surface'}`}>
-        {temperature}
+        {formatTemp(temp, unit)}°
       </p>
     </div>
   );

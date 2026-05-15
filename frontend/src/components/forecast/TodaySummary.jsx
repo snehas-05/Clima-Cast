@@ -1,5 +1,7 @@
 import React from 'react';
 import WeatherIcon from './WeatherIcon';
+import { usePreferences } from '../../context/PreferencesContext';
+import { formatTemp } from '../../utils/temperature';
 
 const conditionGradients = {
   sunny: 'from-amber-400/20 via-orange-500/10 to-transparent',
@@ -11,19 +13,14 @@ const conditionGradients = {
   snow: 'from-cyan-100/20 via-blue-200/10 to-transparent',
 };
 
-const TodaySummary = ({ city, today, unit }) => {
+const TodaySummary = ({ city, today }) => {
+  const { unit } = usePreferences();
   if (!today) return null;
 
   const gradientClass = conditionGradients[today.condition?.toLowerCase()] || conditionGradients.clear;
 
-  // Safe formatting helper
-  const formatValue = (val) => {
-    if (val === undefined || val === null || isNaN(val)) return '--';
-    return Number(val).toFixed(0);
-  };
-
   return (
-    <div className={`glass-card rounded-3xl p-8 relative overflow-hidden transition-all duration-1000 bg-gradient-to-br ${gradientClass}`}>
+    <div className={`glass-card rounded-3xl p-8 relative overflow-hidden transition-all duration-300 bg-gradient-to-br ${gradientClass}`}>
       <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
         <WeatherIcon condition={today.condition} className="w-64 h-64" />
       </div>
@@ -36,22 +33,22 @@ const TodaySummary = ({ city, today, unit }) => {
 
         <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
           <h2 className="text-[84px] font-bold text-on-surface tracking-tighter leading-none">
-            {formatValue(today.high)}°
+            {formatTemp(today.high, unit)}°
           </h2>
           <div className="pb-3">
             <p className="text-2xl font-medium text-on-surface-variant mb-1">{today.condition || '--'}</p>
-            <p className="text-body-main text-on-surface-variant/60">{today.description || '--'}</p>
+            <p className="text-on-surface-variant/80 font-medium">{today.description || '--'}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/5 pt-8">
           <div className="space-y-1">
             <p className="text-label-caps text-on-surface-variant/60">High / Low</p>
-            <p className="text-lg font-bold text-on-surface">{formatValue(today.high)}° / {formatValue(today.low)}°</p>
+            <p className="text-lg font-bold text-on-surface">{formatTemp(today.high, unit)}° / {formatTemp(today.low, unit)}°</p>
           </div>
           <div className="space-y-1">
             <p className="text-label-caps text-on-surface-variant/60">Feels Like</p>
-            <p className="text-lg font-bold text-on-surface">{formatValue(today.feels_like)}°</p>
+            <p className="text-lg font-bold text-on-surface">{formatTemp(today.feels_like, unit)}°</p>
           </div>
           <div className="space-y-1">
             <p className="text-label-caps text-on-surface-variant/60">Sunrise</p>

@@ -20,7 +20,12 @@ import Settings from './pages/Settings';
 import PrivateRoute from './components/PrivateRoute';
 import PublicRoute from './components/PublicRoute';
 
-function App() {
+import { PreferencesProvider } from './context/PreferencesContext';
+import { useTheme } from './hooks/useTheme';
+
+function AppContent() {
+  useTheme(); // Applies theme classes to body
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -55,6 +60,14 @@ function App() {
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+  );
+}
+
+function App() {
+  return (
+    <PreferencesProvider>
+      <AppContent />
+    </PreferencesProvider>
   );
 }
 
