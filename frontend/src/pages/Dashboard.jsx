@@ -5,7 +5,7 @@ import HourCard from '../components/cards/HourCard';
 import InsightCard from '../components/cards/InsightCard';
 import { useGPS } from '../hooks/useGPS';
 import { useWeather } from '../hooks/useWeather';
-import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
+import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton';
 import { usePreferences } from '../context/PreferencesContext';
 import { formatTemp } from '../utils/temperature';
 
@@ -46,8 +46,26 @@ export default function Dashboard() {
 
   if (gpsLoading || (weatherLoading && !weatherData)) {
     return (
-      <div className="p-8">
-        <LoadingSkeleton type="dashboard" />
+      <div className="flex-1 p-8 space-y-8 animate-fade-in">
+        <div className="flex justify-between items-center mb-8">
+          <LoadingSkeleton height="3rem" width="250px" />
+          <LoadingSkeleton height="2.5rem" width="120px" borderRadius="1.25rem" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
+            <LoadingSkeleton height="400px" borderRadius="2rem" />
+          </div>
+          <div className="lg:col-span-4">
+            <LoadingSkeleton height="400px" borderRadius="2rem" />
+          </div>
+        </div>
       </div>
     );
   }

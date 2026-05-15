@@ -291,15 +291,62 @@ body {
    RESPONSIVE SIDEBAR
    ============================================================ */
 
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* ============================================================
+   RESPONSIVE SIDEBAR & LAYOUT
+   ============================================================ */
+
 @media (max-width: 1024px) {
   .sidebar-responsive {
+    position: fixed;
+    z-index: 50;
+    height: 100vh;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .sidebar-responsive.open {
     transform: translateX(0);
   }
   .main-content-responsive {
     margin-left: 0 !important;
+    padding-top: 80px; /* Space for mobile topbar */
+  }
+}
+
+/* Mobile specific touch targets */
+@media (max-width: 640px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .card-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-card-gap);
+  }
+  
+  .horizontal-scroll-mobile {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
   }
 }

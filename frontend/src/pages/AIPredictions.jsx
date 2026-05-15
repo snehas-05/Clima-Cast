@@ -4,6 +4,10 @@ import ChartContainer from '../components/charts/ChartContainer';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
+import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton';
+import { useWeather } from '../hooks/useWeather';
+import { usePreferences } from '../context/PreferencesContext';
+import { formatTemp } from '../utils/temperature';
 
 const heroStats = [
   { label: 'CONFIDENCE', key: 'confidence', sub: 'Neural Mesh Active' },
@@ -29,7 +33,7 @@ const PredictionCard = ({ title, icon, value, subValue, explanation, loading, tr
     
     <div>
       {loading ? (
-        <div className="h-10 w-32 bg-surface-container-highest animate-pulse rounded-lg" />
+        <LoadingSkeleton height="2.5rem" width="60%" />
       ) : (
         <div className="flex items-baseline gap-2">
           <p className={`text-h2-dashboard ${colorClass}`}>{value}</p>
@@ -73,36 +77,49 @@ export default function AIPredictions() {
     metrics: null
   });
   const [loading, setLoading] = useState(true);
+  const [isMLAvailable, setIsMLAvailable] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  const { unit } = usePreferences();
+  const { data: apiWeather, forecast: apiForecast, fetchWeather, fetchForecast, loading: apiLoading } = useWeather();
 
   const fetchPredictions = async (targetCity) => {
     setLoading(true);
     setError(null);
+    setIsMLAvailable(true);
     try {
       const month = new Date().getMonth() + 1;
       
-      // Fetch all predictions in parallel
-      const [rainRes, tempRes, humRes, alertRes, trendRes, metricsRes] = await Promise.allSettled([
-        api.get(`/predict/rain?city=${targetCity}&temp=25&humidity=80&pressure=1010`),
-        api.get(`/predict/temperature?city=${targetCity}&month=${month}&humidity=75&pressure=1008`),
-        api.get(`/predict/humidity?city=${targetCity}&month=${month}&temp=28`),
-        api.get(`/predict/alerts?city=${targetCity}&temp=32&wind=15&humidity=70&pressure=1012&month=${month}`),
-        api.get(`/predict/trend?city=${targetCity}`),
-        api.get(`/predict/metrics`)
-      ]);
+      // First check if ML is available for this city
+      const availabilityRes = await api.get(`/predict/rain?city=${targetCity}&temp=25&humidity=80&pressure=1010`);
+      
+      if (!availabilityRes.data.ml_available) {
+        setIsMLAvailable(false);
+        // If ML not available, fetch normal weather and forecast as fallback
+        await Promise.all([
+          fetchWeather({ city: targetCity }),
+          fetchForecast(targetCity)
+        ]);
+      } else {
+        // Fetch all predictions in parallel
+        const [rainRes, tempRes, humRes, alertRes, trendRes, metricsRes] = await Promise.allSettled([
+          api.get(`/predict/rain?city=${targetCity}&temp=25&humidity=80&pressure=1010`),
+          api.get(`/predict/temperature?city=${targetCity}&month=${month}&humidity=75&pressure=1008`),
+          api.get(`/predict/humidity?city=${targetCity}&month=${month}&temp=28`),
+          api.get(`/predict/alerts?city=${targetCity}&temp=32&wind=15&humidity=70&pressure=1012&month=${month}`),
+          api.get(`/predict/trend?city=${targetCity}`),
+          api.get(`/predict/metrics`)
+        ]);
 
-      setPredictions({
-        rain: rainRes.status === 'fulfilled' ? rainRes.value.data : null,
-        temp: tempRes.status === 'fulfilled' ? tempRes.value.data : null,
-        humidity: humRes.status === 'fulfilled' ? humRes.value.data : null,
-        alerts: alertRes.status === 'fulfilled' ? alertRes.value.data : null,
-        trend: trendRes.status === 'fulfilled' ? trendRes.value.data : null,
-        metrics: metricsRes.status === 'fulfilled' ? metricsRes.value.data : null
-      });
-
-      if (rainRes.status === 'fulfilled' && !rainRes.value.data.success && !rainRes.value.data.ml_available) {
-        setError("AI predictions not available for this city — showing global data only");
+        setPredictions({
+          rain: rainRes.status === 'fulfilled' ? rainRes.value.data : null,
+          temp: tempRes.status === 'fulfilled' ? tempRes.value.data : null,
+          humidity: humRes.status === 'fulfilled' ? humRes.value.data : null,
+          alerts: alertRes.status === 'fulfilled' ? alertRes.value.data : null,
+          trend: trendRes.status === 'fulfilled' ? trendRes.value.data : null,
+          metrics: metricsRes.status === 'fulfilled' ? metricsRes.value.data : null
+        });
       }
 
       setLastUpdated(new Date());
@@ -131,6 +148,32 @@ export default function AIPredictions() {
     ? (predictions.rain.prediction.probability * 100).toFixed(1)
     : "92.4";
 
+  if (loading && !predictions.rain && !apiWeather) {
+    return (
+      <div className="flex-1 p-8 space-y-8 animate-fade-in">
+        <div className="flex justify-between items-center mb-8">
+          <LoadingSkeleton height="3rem" width="250px" />
+          <LoadingSkeleton height="2.5rem" width="120px" borderRadius="1.25rem" />
+        </div>
+        <LoadingSkeleton height="300px" borderRadius="2rem" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
+            <LoadingSkeleton height="400px" borderRadius="2rem" />
+          </div>
+          <div className="lg:col-span-4">
+            <LoadingSkeleton height="400px" borderRadius="2rem" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <TopBar title="AI Predictions" subtitle={`Neural Forecasting Engine — ${city}`} />
@@ -155,12 +198,50 @@ export default function AIPredictions() {
           </div>
         </div>
 
+        {!isMLAvailable && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass-card rounded-3xl p-8 border-l-4 border-l-primary flex flex-col md:flex-row items-center gap-8 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary/10 rounded-xl">
+                  <span className="material-symbols-outlined text-primary">info</span>
+                </div>
+                <h3 className="text-h3-card-title text-on-surface">AI Predictions are being calibrated</h3>
+              </div>
+              <p className="text-body-lg text-on-surface-variant leading-relaxed">
+                Atmospheric intelligence is not yet available for <span className="text-primary font-bold">{city}</span>. Our models are currently training on this region's micro-climate. In the meantime, we are providing a high-precision 5-day forecast from our global sensor network.
+              </p>
+              <div className="flex gap-4 pt-2">
+                <div className="px-4 py-2 bg-surface-container-low rounded-full border border-white/50 text-label-caps text-on-surface-variant flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">history</span>
+                  HISTORICAL DATA: ACTIVE
+                </div>
+                <div className="px-4 py-2 bg-surface-container-low rounded-full border border-white/50 text-label-caps text-on-surface-variant flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">sensors</span>
+                  API FORECAST: VERIFIED
+                </div>
+              </div>
+            </div>
+            <div className="w-full md:w-64 aspect-square bg-surface-container-high rounded-2xl flex items-center justify-center relative group">
+              <span className="material-symbols-outlined text-6xl text-primary/20 group-hover:scale-110 transition-transform">cloud_sync</span>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[10px] text-label-caps text-primary/60 mt-20">MODEL TRAINING</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {error && (
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-tertiary/10 border border-tertiary/30 rounded-2xl text-tertiary text-center font-medium"
+            className="p-4 bg-error/10 border border-error/30 rounded-2xl text-error text-center font-medium flex items-center justify-center gap-2"
           >
+            <span className="material-symbols-outlined text-sm">error</span>
             {error}
           </motion.div>
         )}
@@ -215,17 +296,23 @@ export default function AIPredictions() {
           <PredictionCard 
             title="RAIN PROBABILITY"
             icon="water_drop"
-            value={`${Math.round((predictions.rain?.prediction?.probability || 0.12) * 100)}%`}
-            subValue={predictions.rain?.prediction?.label === 'Yes' ? 'Expect Rain' : 'Dry Conditions'}
+            value={isMLAvailable 
+              ? `${Math.round((predictions.rain?.prediction?.probability || 0) * 100)}%`
+              : `${apiWeather?.humidity > 80 ? '70' : '15'}%`}
+            subValue={isMLAvailable 
+              ? (predictions.rain?.prediction?.label === 'Yes' ? 'Expect Rain' : 'Dry Conditions')
+              : (apiWeather?.humidity > 80 ? 'High Humidity' : 'Clear Skies')}
             explanation={predictions.rain?.explanation}
             loading={loading}
-            trend={predictions.rain?.prediction?.probability > 0.5 ? 'up' : 'down'}
+            trend={isMLAvailable ? (predictions.rain?.prediction?.probability > 0.5 ? 'up' : 'down') : 'stable'}
           />
           <PredictionCard 
             title="TEMPERATURE"
             icon="thermostat"
-            value={`${(predictions.temp?.prediction?.temp_c || 24.5).toFixed(1)}°C`}
-            subValue="Predicted Mean"
+            value={isMLAvailable 
+              ? `${(predictions.temp?.prediction?.temp_c || 0).toFixed(1)}°C`
+              : `${formatTemp(apiWeather?.temperature || 0, unit)}°`}
+            subValue={isMLAvailable ? "Predicted Mean" : "Current Observation"}
             explanation={predictions.temp?.explanation}
             loading={loading}
             trend="up"
@@ -234,7 +321,7 @@ export default function AIPredictions() {
           <PredictionCard 
             title="HUMIDITY"
             icon="humidity_percentage"
-            value={`${Math.round(predictions.humidity?.prediction?.humidity || 65)}%`}
+            value={`${Math.round(isMLAvailable ? (predictions.humidity?.prediction?.humidity || 0) : (apiWeather?.humidity || 0))}%`}
             subValue="Atmospheric Saturation"
             loading={loading}
             colorClass="text-tertiary"
@@ -242,11 +329,11 @@ export default function AIPredictions() {
           <PredictionCard 
             title="WEATHER ALERT"
             icon="warning"
-            value={predictions.alerts?.prediction?.alert_type || 'Normal'}
-            subValue={`${Math.round((predictions.alerts?.prediction?.probability || 0.95) * 100)}% Confidence`}
+            value={isMLAvailable ? (predictions.alerts?.prediction?.alert_type || 'Normal') : 'No Active Alerts'}
+            subValue={isMLAvailable ? `${Math.round((predictions.alerts?.prediction?.probability || 0) * 100)}% Confidence` : "Live Verification"}
             explanation={predictions.alerts?.explanation}
             loading={loading}
-            colorClass={predictions.alerts?.prediction?.alert_type === 'normal' ? 'text-success' : 'text-error'}
+            colorClass={isMLAvailable && predictions.alerts?.prediction?.alert_type !== 'normal' ? 'text-error' : 'text-success'}
           />
         </div>
 

@@ -3,7 +3,7 @@ import WeatherCard from '../components/cards/WeatherCard';
 import Button from '../components/ui/Button';
 import api from '../services/api';
 import { useWeather } from '../hooks/useWeather';
-import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
+import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton';
 
 export default function SavedCities() {
   const [favorites, setFavorites] = useState([]);
@@ -115,22 +115,36 @@ export default function SavedCities() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-card-gap)]">
           {loading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-64 glass-card rounded-3xl animate-pulse" />)
+            [1, 2, 3].map(i => <CardSkeleton key={i} />)
           ) : (
             <>
-              {favorites.map((fav, i) => (
-                <WeatherCard 
-                  key={i} 
-                  city={fav.city}
-                  country={fav.country}
-                  temperature={fav.temperature}
-                  condition={fav.condition}
-                  weatherIcon={fav.icon}
-                  ml_available={fav.ml_available}
-                  gradientClass={fav.gradient}
-                  onRemove={() => handleRemoveFavorite(fav.city)} 
-                />
-              ))}
+              {favorites.length === 0 ? (
+                <div className="md:col-span-2 lg:col-span-3 glass-card rounded-3xl p-16 flex flex-col items-center text-center space-y-6">
+                  <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-6xl text-primary opacity-20">location_off</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-on-surface">No cities saved yet</h3>
+                    <p className="text-on-surface-variant max-w-md mx-auto">
+                      Search and add your first city to start monitoring atmospheric conditions and AI-powered predictions.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                favorites.map((fav, i) => (
+                  <WeatherCard 
+                    key={i} 
+                    city={fav.city}
+                    country={fav.country}
+                    temperature={fav.temperature}
+                    condition={fav.condition}
+                    weatherIcon={fav.icon}
+                    ml_available={fav.ml_available}
+                    gradientClass={fav.gradient}
+                    onRemove={() => handleRemoveFavorite(fav.city)} 
+                  />
+                ))
+              )}
 
               <div 
                 onClick={() => document.querySelector('input').focus()}

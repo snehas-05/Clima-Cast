@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const PreferencesContext = createContext();
 
@@ -19,7 +19,7 @@ export const PreferencesProvider = ({ children }) => {
     const fetchPreferences = async () => {
       if (token) {
         try {
-          const response = await axios.get('http://localhost:8000/settings/preferences', {
+          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/settings/preferences`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (response.data.success) {
@@ -57,7 +57,7 @@ export const PreferencesProvider = ({ children }) => {
     // Server persistence
     if (token) {
       try {
-        await axios.post('http://localhost:8000/settings/preferences', {
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/settings/preferences`, {
           theme: updated.theme,
           unit: updated.unit,
           show_confidence: updated.showConfidence

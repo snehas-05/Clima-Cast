@@ -25,6 +25,10 @@ export default function Sidebar({ isOpen, onClose }) {
         <div
           className="fixed inset-0 bg-black/20 z-40 lg:hidden"
           onClick={onClose}
+          role="button"
+          aria-label="Close sidebar menu"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && onClose()}
         />
       )}
 
@@ -32,6 +36,7 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`fixed left-0 top-0 h-full w-[280px] glass-sidebar flex flex-col py-8 px-6 gap-y-4 z-50
           transition-transform duration-300 lg:translate-x-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        aria-label="Main Navigation Sidebar"
       >
         {/* Brand */}
         <div className="mb-8 px-2">
@@ -44,12 +49,13 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar" aria-label="Primary Navigation">
           {navItems.map(({ to, icon, label }) => (
             <NavLink
               key={to}
               to={to}
               onClick={onClose}
+              aria-label={`Navigate to ${label}`}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                 ${isActive
@@ -62,6 +68,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 <>
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={
                       isActive
                         ? { fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }
@@ -82,13 +89,14 @@ export default function Sidebar({ isOpen, onClose }) {
           {bottomItems.map(({ icon, label, action }) => (
             <button
               key={action}
+              aria-label={label}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                 ${action === 'logout'
                   ? 'text-on-surface-variant hover:text-error'
                   : 'text-on-surface-variant hover:text-primary'
                 }`}
             >
-              <span className="material-symbols-outlined">{icon}</span>
+              <span className="material-symbols-outlined" aria-hidden="true">{icon}</span>
               <span className="text-body-main">{label}</span>
             </button>
           ))}

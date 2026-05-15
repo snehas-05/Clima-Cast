@@ -5,9 +5,11 @@ export default function UnitToggle() {
   const { unit, updateUnit } = usePreferences();
 
   return (
-    <div className="flex bg-surface-container-high p-1 rounded-full border border-outline-variant/30">
+    <div className="flex bg-surface-container-high p-1 rounded-full border border-outline-variant/30" role="group" aria-label="Temperature unit toggle">
       <button
         onClick={() => updateUnit('celsius')}
+        aria-label="Switch to Celsius"
+        aria-pressed={unit === 'celsius'}
         className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
           unit === 'celsius'
             ? 'bg-primary text-white shadow-sm'
@@ -18,6 +20,8 @@ export default function UnitToggle() {
       </button>
       <button
         onClick={() => updateUnit('fahrenheit')}
+        aria-label="Switch to Fahrenheit"
+        aria-pressed={unit === 'fahrenheit'}
         className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
           unit === 'fahrenheit'
             ? 'bg-primary text-white shadow-sm'

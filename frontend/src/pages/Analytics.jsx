@@ -131,13 +131,18 @@ export default function Analytics() {
         </div>
 
         {/* Metrics Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {metrics.map((m) => <MetricCard key={m.label} {...m} />)}
-        </motion.div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {loading && !data.history.length ? (
+            <>
+              <MetricCard loading={true} />
+              <MetricCard loading={true} />
+              <MetricCard loading={true} />
+              <MetricCard loading={true} />
+            </>
+          ) : (
+            metrics.map((m) => <MetricCard key={m.label} {...m} loading={loading} />)
+          )}
+        </div>
 
         {/* Hero Section: Past + Future Timeline */}
         <motion.div 

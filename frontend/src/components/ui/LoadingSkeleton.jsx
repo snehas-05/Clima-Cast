@@ -1,32 +1,55 @@
 import React from 'react';
 
-const Skeleton = ({ className }) => (
-  <div className={`animate-pulse bg-slate-700/50 rounded ${className}`} />
+const LoadingSkeleton = ({ className = '', height = '1rem', width = '100%', borderRadius = '0.5rem' }) => {
+  return (
+    <div
+      className={`animate-pulse bg-surface-container-high relative overflow-hidden ${className}`}
+      style={{
+        height,
+        width,
+        borderRadius,
+      }}
+    >
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    </div>
+  );
+};
+
+export const CardSkeleton = () => (
+  <div className="glass-card p-6 rounded-3xl space-y-4">
+    <LoadingSkeleton height="1.5rem" width="40%" />
+    <LoadingSkeleton height="3rem" width="70%" />
+    <div className="flex gap-4">
+      <LoadingSkeleton height="1rem" width="30%" />
+      <LoadingSkeleton height="1rem" width="30%" />
+    </div>
+  </div>
 );
 
-export function LoadingSkeleton({ type = "card" }) {
-  if (type === "dashboard") {
-    return (
-      <div className="space-y-6">
-        {/* Banner Skeleton */}
-        <Skeleton className="h-12 w-full rounded-xl" />
-        
-        {/* Main Stats Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32 rounded-2xl" />
-          ))}
-        </div>
-        
-        {/* Chart Skeleton */}
-        <Skeleton className="h-[400px] w-full rounded-2xl" />
+export const ChartSkeleton = () => (
+  <div className="glass-card p-6 rounded-3xl h-[400px] flex flex-col justify-between">
+    <div className="flex justify-between items-center">
+      <LoadingSkeleton height="1.5rem" width="150px" />
+      <div className="flex gap-2">
+        <LoadingSkeleton height="2rem" width="60px" borderRadius="1rem" />
+        <LoadingSkeleton height="2rem" width="60px" borderRadius="1rem" />
       </div>
-    );
-  }
+    </div>
+    <div className="flex items-end gap-2 h-[250px] px-4">
+      {[...Array(12)].map((_, i) => (
+        <LoadingSkeleton 
+          key={i} 
+          height={`${Math.random() * 60 + 20}%`} 
+          className="flex-1" 
+        />
+      ))}
+    </div>
+    <div className="flex justify-between px-4">
+      {[...Array(6)].map((_, i) => (
+        <LoadingSkeleton key={i} height="0.75rem" width="40px" />
+      ))}
+    </div>
+  </div>
+);
 
-  if (type === "card") {
-    return <Skeleton className="h-32 w-full rounded-2xl" />;
-  }
-
-  return <Skeleton className="h-4 w-full" />;
-}
+export default LoadingSkeleton;

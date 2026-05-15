@@ -4,6 +4,7 @@ import Button from '../components/ui/Button';
 import AlertCard from '../components/cards/AlertCard';
 import { useWeather } from '../hooks/useWeather';
 import api from '../services/api';
+import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton';
 
 export default function Alerts() {
   const { data: weatherData } = useWeather();
@@ -42,24 +43,28 @@ export default function Alerts() {
   return (
     <>
       <TopBar title="Alerts Intelligence" subtitle={weatherData?.city || "Global Feed"} />
-      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]">
+      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)] animate-fade-in">
         
         {/* Stats Row */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-[var(--spacing-card-gap)]">
-          {stats.map((s) => (
-            <div key={s.label} className={`glass-card p-6 rounded-3xl border-l-4 ${s.border}`}>
-              <div className="flex justify-between items-start mb-4">
-                <span className={`p-2 rounded-lg ${s.iconBg}`}>
-                  <span className="material-symbols-outlined">{s.icon}</span>
-                </span>
-                <span className={`text-xs text-label-caps px-2 py-1 rounded ${s.badge}`}>
-                  {s.severity}
-                </span>
+          {loading && alerts.length === 0 ? (
+            [1, 2, 3].map(i => <CardSkeleton key={i} />)
+          ) : (
+            stats.map((s) => (
+              <div key={s.label} className={`glass-card p-6 rounded-3xl border-l-4 ${s.border}`}>
+                <div className="flex justify-between items-start mb-4">
+                  <span className={`p-2 rounded-lg ${s.iconBg}`}>
+                    <span className="material-symbols-outlined">{s.icon}</span>
+                  </span>
+                  <span className={`text-xs text-label-caps px-2 py-1 rounded ${s.badge}`}>
+                    {s.severity}
+                  </span>
+                </div>
+                <h3 className="text-4xl font-bold text-on-surface mb-1">{s.value}</h3>
+                <p className="text-on-surface-variant font-medium">{s.label}</p>
               </div>
-              <h3 className="text-4xl font-bold text-on-surface mb-1">{s.value}</h3>
-              <p className="text-on-surface-variant font-medium">{s.label}</p>
-            </div>
-          ))}
+            ))
+          )}
         </section>
 
         {/* Main Grid */}
@@ -101,7 +106,17 @@ export default function Alerts() {
                 Storm Tracking Updates
               </h3>
               <div className="space-y-6">
-                {alerts.length > 0 ? (
+                {loading ? (
+                  [1, 2].map(i => (
+                    <div key={i} className="flex items-start gap-4 pb-6">
+                      <LoadingSkeleton height="0.75rem" width="0.75rem" borderRadius="100%" />
+                      <div className="flex-1 space-y-2">
+                        <LoadingSkeleton height="1rem" width="30%" />
+                        <LoadingSkeleton height="0.75rem" width="100%" />
+                      </div>
+                    </div>
+                  ))
+                ) : alerts.length > 0 ? (
                   alerts.map((alert, idx) => (
                     <div key={idx} className="flex items-start gap-4 pb-6 border-b border-outline-variant/20 last:border-0 last:pb-0">
                       <div className={`mt-1 w-2 h-2 rounded-full ${alert.severity === 'extreme' ? 'bg-error ring-4 ring-error/10' : 'bg-primary ring-4 ring-primary/10'}`} />
@@ -139,8 +154,8 @@ export default function Alerts() {
               </span>
             </div>
             <div className="space-y-4">
-              {loading ? (
-                [1, 2].map(i => <div key={i} className="h-48 glass-card rounded-3xl animate-pulse" />)
+              {loading && alerts.length === 0 ? (
+                [1, 2].map(i => <CardSkeleton key={i} />)
               ) : alerts.length > 0 ? (
                 alerts.map((alert, i) => <AlertCard key={i} {...alert} />)
               ) : (
