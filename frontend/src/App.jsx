@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TRANSITIONS } from './utils/motion';
@@ -29,6 +30,7 @@ import PrivateRoute from './components/PrivateRoute';
 import PublicRoute from './components/PublicRoute';
 
 import { PreferencesProvider } from './context/PreferencesContext';
+import { WeatherProvider } from './context/WeatherContext';
 import { useTheme } from './hooks/useTheme';
 
 const PageLoader = () => (
