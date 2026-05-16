@@ -196,6 +196,8 @@ class WeatherService:
         return {
             "city": api_data.get("name"),
             "temperature": round(temp, 1),
+            "temp_min": round((main.get("temp_min") * 9/5 + 32) if unit == UnitType.FAHRENHEIT else main.get("temp_min"), 1),
+            "temp_max": round((main.get("temp_max") * 9/5 + 32) if unit == UnitType.FAHRENHEIT else main.get("temp_max"), 1),
             "unit": unit,
             "humidity": main.get("humidity"),
             "wind_kph": round(wind.get("speed", 0) * 3.6, 1), # m/s to kph
@@ -206,6 +208,7 @@ class WeatherService:
             "gradient": theme["gradient"],
             "raw_icon": weather.get("icon")
         }
+
 
     @staticmethod
     def _aggregate_forecast(api_data: Dict[str, Any], user: Optional[User] = None) -> Dict[str, Any]:

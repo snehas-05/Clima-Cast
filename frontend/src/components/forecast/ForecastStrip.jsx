@@ -3,7 +3,7 @@ import WeatherIcon from './WeatherIcon';
 import { usePreferences } from '../../context/PreferencesContext';
 import { formatTemp } from '../../utils/temperature';
 
-const ForecastStrip = ({ hourly = [] }) => {
+const ForecastStrip = ({ hourly = [], onCardClick }) => {
   const { unit } = usePreferences();
   const scrollRef = useRef(null);
 
@@ -60,7 +60,8 @@ const ForecastStrip = ({ hourly = [] }) => {
         {hourly.map((h, i) => (
           <div 
             key={`${h.time}-${i}`} 
-            className="flex-shrink-0 w-24 bg-surface-container-low/50 rounded-2xl p-4 flex flex-col items-center border border-white/5 snap-center hover:border-primary/20 transition-all group"
+            className={`flex-shrink-0 w-24 bg-surface-container-low/50 rounded-2xl p-4 flex flex-col items-center border border-white/5 snap-center hover:border-primary/20 transition-all group ${onCardClick ? 'cursor-pointer hover:bg-surface-container-high hover:-translate-y-1 active:scale-95' : ''}`}
+            onClick={() => onCardClick?.(h)}
           >
             <span className="text-xs font-bold text-on-surface-variant mb-3 group-hover:text-primary transition-colors">
               {h.time || '--'}

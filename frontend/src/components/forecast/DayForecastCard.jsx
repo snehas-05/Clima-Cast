@@ -11,7 +11,8 @@ const DayForecastCard = ({
   condition, 
   max_temp, 
   min_temp, 
-  rain_probability 
+  rain_probability,
+  onClick 
 }) => {
   const { unit } = usePreferences();
 
@@ -21,7 +22,10 @@ const DayForecastCard = ({
   };
 
   return (
-    <div className="bg-surface-container-low/40 backdrop-blur-xl rounded-[2rem] p-6 border border-white/5 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-500 group flex flex-col items-center text-center shadow-lg hover:shadow-primary/5">
+    <div 
+      className={`bg-surface-container-low/40 backdrop-blur-xl rounded-[2rem] p-6 border border-white/5 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-500 group flex flex-col items-center text-center shadow-lg hover:shadow-primary/5 ${onClick ? 'cursor-pointer hover:-translate-y-2 active:scale-95' : ''}`}
+      onClick={onClick}
+    >
       <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-[0.2em]">
         {short_day?.toUpperCase() || '--'}
       </p>

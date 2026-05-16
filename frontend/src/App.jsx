@@ -45,6 +45,8 @@ const PageLoader = () => (
   </div>
 );
 
+import { WeatherProvider } from './context/WeatherContext';
+
 function AppContent() {
   useTheme(); // Applies theme classes to body
 
@@ -93,7 +95,9 @@ function AppContent() {
 function App() {
   return (
     <PreferencesProvider>
-      <AppContent />
+      <WeatherProvider>
+        <AppContent />
+      </WeatherProvider>
     </PreferencesProvider>
   );
 }

@@ -4,7 +4,7 @@ import MetricCard from '../components/cards/MetricCard';
 import HourCard from '../components/cards/HourCard';
 import InsightCard from '../components/cards/InsightCard';
 import Modal from '../components/ui/Modal';
-import { useGPS } from '../hooks/useGPS';
+import { useWeatherContext } from '../context/WeatherContext';
 import { useWeather } from '../hooks/useWeather';
 import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton';
 import { usePreferences } from '../context/PreferencesContext';
@@ -12,7 +12,7 @@ import { formatTemp } from '../utils/temperature';
 
 export default function Dashboard() {
   const { unit } = usePreferences();
-  const { coordinates, loading: gpsLoading, error: gpsError, permissionDenied } = useGPS();
+  const { activeCity, coordinates, loading: geoLoading, error: geoError } = useWeatherContext();
   const { 
     data: weatherData, 
     forecast: forecastData, 
@@ -27,14 +27,16 @@ export default function Dashboard() {
   const [airQuality, setAirQuality] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
 
+  // Fetch weather when city or coords change
   useEffect(() => {
     if (coordinates) {
       fetchWeather({ lat: coordinates.lat, lon: coordinates.lon });
-    } else if (permissionDenied || gpsError) {
-      fetchWeather({ city: 'Mumbai' });
+    } else if (activeCity) {
+      fetchWeather({ city: activeCity });
     }
-  }, [coordinates, gpsError, permissionDenied, fetchWeather]);
+  }, [activeCity, coordinates, fetchWeather]);
 
+  // Fetch related data when weather data is loaded
   useEffect(() => {
     if (weatherData?.city) {
       fetchForecast(weatherData.city, false);
@@ -46,7 +48,7 @@ export default function Dashboard() {
     }
   }, [weatherData?.city, fetchForecast, fetchAirQuality]);
 
-  if (gpsLoading || (weatherLoading && !weatherData)) {
+  if (geoLoading || (weatherLoading && !weatherData)) {
     return (
       <div className="flex-1 p-8 space-y-8 animate-fade-in">
         <div className="flex justify-between items-center mb-8">

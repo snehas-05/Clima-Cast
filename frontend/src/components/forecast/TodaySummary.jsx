@@ -13,14 +13,17 @@ const conditionGradients = {
   snow: 'from-cyan-100/20 via-blue-200/10 to-transparent',
 };
 
-const TodaySummary = ({ city, today }) => {
+const TodaySummary = ({ city, today, onClick }) => {
   const { unit } = usePreferences();
   if (!today) return null;
 
   const gradientClass = conditionGradients[today.condition?.toLowerCase()] || conditionGradients.clear;
 
   return (
-    <div className={`glass-card rounded-[2.5rem] p-10 relative overflow-hidden transition-all duration-500 bg-gradient-to-br ${gradientClass} border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] group`}>
+    <div 
+      className={`glass-card rounded-[2.5rem] p-10 relative overflow-hidden transition-all duration-500 bg-gradient-to-br ${gradientClass} border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] group ${onClick ? 'cursor-pointer hover:scale-[1.01] active:scale-[0.99]' : ''}`}
+      onClick={onClick}
+    >
       <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
         <WeatherIcon condition={today.condition} className="w-80 h-80" />
       </div>
@@ -34,7 +37,7 @@ const TodaySummary = ({ city, today }) => {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end gap-8 mb-10">
-          <h2 className="text-[100px] font-black text-on-surface tracking-tighter leading-none bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+          <h2 className="text-[100px] font-black tracking-tighter leading-none bg-gradient-to-b from-on-surface to-on-surface/60 bg-clip-text text-transparent">
             {formatTemp(today.high, unit)}°
           </h2>
           <div className="pb-4">

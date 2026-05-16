@@ -1,15 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import TopBar from '../components/layout/TopBar';
 import { useWeather } from '../hooks/useWeather';
-import { useGPS } from '../hooks/useGPS';
+import { useWeatherContext } from '../context/WeatherContext';
 import { useAuth } from '../hooks/useAuth';
 import TodaySummary from '../components/forecast/TodaySummary';
 import ForecastStrip from '../components/forecast/ForecastStrip';
 import DayForecastCard from '../components/forecast/DayForecastCard';
+import Modal from '../components/ui/Modal';
+import { usePreferences } from '../context/PreferencesContext';
+import { formatTemp } from '../utils/temperature';
 import { TodaySummarySkeleton, HourlyStripSkeleton, DailyGridSkeleton } from '../components/forecast/ForecastSkeletons';
 
 export default function Forecast() {
-  const { coordinates, loading: gpsLoading } = useGPS();
+  const { unit } = usePreferences();
+  const { activeCity, coordinates, loading: geoLoading } = useWeatherContext();
   const { user } = useAuth();
   const {
     forecast,
@@ -19,49 +23,23 @@ export default function Forecast() {
     data: currentWeatherData
   } = useWeather();
 
-  const [activeCity, setActiveCity] = useState(null);
+  const [selectedCard, setSelectedCard] = useState(null);
 
-  // 1. Resolve Active City (GPS > Home > Last Searched > Mumbai)
+  // Fetch forecast once city or coords are available from context
   useEffect(() => {
-    const resolveCity = async () => {
-      // a. GPS
+    const loadForecast = async () => {
       if (coordinates) {
-        const weather = await fetchWeather({ lat: coordinates.lat, lon: coordinates.lon });
-        if (weather?.city) {
-          setActiveCity(weather.city);
-          localStorage.setItem('last_searched_city', weather.city);
-          return;
-        }
+        // If we have coords, we might need to resolve city first for forecast if backend requires it
+        // Or backend can handle /forecast?lat=...&lon=...
+        // For now, WeatherContext handles resolving city from coords, so activeCity should eventually update.
+        if (activeCity) fetchForecast(activeCity);
+      } else if (activeCity) {
+        fetchForecast(activeCity);
       }
-
-      // b. Home City
-      if (user?.home_city) {
-        setActiveCity(user.home_city);
-        return;
-      }
-
-      // c. Last Searched
-      const lastCity = localStorage.getItem('last_searched_city');
-      if (lastCity) {
-        setActiveCity(lastCity);
-        return;
-      }
-
-      // d. Fallback
-      setActiveCity('Mumbai');
     };
 
-    if (!gpsLoading) {
-      resolveCity();
-    }
-  }, [coordinates, gpsLoading, user, fetchWeather]);
-
-  // 2. Fetch Forecast once city is resolved
-  useEffect(() => {
-    if (activeCity) {
-      fetchForecast(activeCity);
-    }
-  }, [activeCity, fetchForecast]);
+    loadForecast();
+  }, [activeCity, coordinates, fetchForecast]);
 
   // 3. Memoize grouped forecast calculations
   const memoizedForecast = useMemo(() => {
@@ -76,6 +54,97 @@ export default function Forecast() {
   // 4. Dynamic Background Background Color based on weather
   const getBackgroundClass = () => 'bg-background';
 
+  const getModalContent = () => {
+    if (!selectedCard) return null;
+    const { type, data } = selectedCard;
+
+    if (type === 'today') {
+      return (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-3xl bg-primary/5 border border-primary/10 text-center">
+              <p className="text-label-caps text-on-surface-variant mb-1">High</p>
+              <p className="text-3xl font-bold text-primary">{formatTemp(data.high, unit)}°</p>
+            </div>
+            <div className="p-4 rounded-3xl bg-secondary/5 border border-secondary/10 text-center">
+              <p className="text-label-caps text-on-surface-variant mb-1">Low</p>
+              <p className="text-3xl font-bold text-secondary">{formatTemp(data.low, unit)}°</p>
+            </div>
+          </div>
+          <div className="glass-card p-6 rounded-3xl">
+             <p className="text-body-main text-on-surface-variant mb-4">
+               {data.description}. The day will see a high of {formatTemp(data.high, unit)}° and a low of {formatTemp(data.low, unit)}°.
+             </p>
+             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                <div>
+                   <p className="text-[10px] text-label-caps text-on-surface-variant/60 font-bold">FEELS LIKE</p>
+                   <p className="text-lg font-bold text-on-surface">{formatTemp(data.feels_like, unit)}°</p>
+                </div>
+                <div>
+                   <p className="text-[10px] text-label-caps text-on-surface-variant/60 font-bold">HUMIDITY</p>
+                   <p className="text-lg font-bold text-on-surface">{data.humidity || 'N/A'}%</p>
+                </div>
+             </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (type === 'hourly') {
+      return (
+        <div className="space-y-6 text-center">
+          <div className="p-10 glass-card rounded-[2.5rem] inline-block mx-auto border-primary/20">
+            <p className="text-label-caps text-on-surface-variant mb-2">{data.time}</p>
+            <p className="text-h1-hero text-on-surface">{formatTemp(data.temp, unit)}°</p>
+            <p className="text-h3-card-title text-primary mt-2 uppercase tracking-widest">{data.condition}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-left">
+             <div className="p-4 glass-card rounded-2xl">
+                <p className="text-[10px] text-label-caps text-on-surface-variant/60 font-bold">WIND</p>
+                <p className="text-lg font-bold text-on-surface">{data.wind_kph || '--'} km/h</p>
+             </div>
+             <div className="p-4 glass-card rounded-2xl">
+                <p className="text-[10px] text-label-caps text-on-surface-variant/60 font-bold">CHANCE OF RAIN</p>
+                <p className="text-lg font-bold text-on-surface">{data.precip_mm || '0'} mm</p>
+             </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (type === 'daily') {
+      return (
+        <div className="space-y-6">
+           <div className="flex flex-col items-center text-center space-y-4">
+              <p className="text-label-caps text-primary font-bold tracking-[0.2em] mb-1">{data.day?.toUpperCase() || data.short_day?.toUpperCase()}</p>
+              <h4 className="text-3xl font-bold text-on-surface">{data.condition}</h4>
+              <p className="text-on-surface-variant">{data.date}</p>
+           </div>
+           <div className="grid grid-cols-2 gap-4">
+              <div className="p-6 glass-card rounded-3xl text-center bg-gradient-to-br from-primary/5 to-transparent">
+                 <p className="text-label-caps text-on-surface-variant mb-2">High</p>
+                 <p className="text-4xl font-bold text-on-surface">{formatTemp(data.max_temp, unit)}°</p>
+              </div>
+              <div className="p-6 glass-card rounded-3xl text-center bg-gradient-to-br from-slate-800/10 to-transparent">
+                 <p className="text-label-caps text-on-surface-variant mb-2">Low</p>
+                 <p className="text-4xl font-bold text-on-surface">{formatTemp(data.min_temp, unit)}°</p>
+              </div>
+           </div>
+           <div className="p-6 glass-card rounded-3xl">
+              <h5 className="font-bold text-primary mb-3">Daily Summary</h5>
+              <p className="text-on-surface-variant leading-relaxed">
+                 Expect {data.condition.toLowerCase()} conditions throughout the day. 
+                 The temperature will fluctuate between {formatTemp(data.min_temp, unit)}° and {formatTemp(data.max_temp, unit)}°.
+                 {data.rain_probability > 0 ? ` There is a ${data.rain_probability}% chance of precipitation.` : ' No significant precipitation is expected.'}
+              </p>
+           </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
 
   return (
     <div className={`min-h-screen transition-colors duration-1000 ${getBackgroundClass()}`}>
@@ -87,14 +156,21 @@ export default function Forecast() {
         {forecastLoading && !memoizedForecast ? (
           <TodaySummarySkeleton />
         ) : (
-          <TodaySummary city={activeCity} today={memoizedForecast?.today} />
+          <TodaySummary 
+            city={activeCity} 
+            today={memoizedForecast?.today} 
+            onClick={() => setSelectedCard({ type: 'today', data: memoizedForecast.today, title: `Today's Outlook - ${activeCity}` })}
+          />
         )}
 
         {/* Hourly Strip */}
         {forecastLoading && !memoizedForecast ? (
           <HourlyStripSkeleton />
         ) : (
-          <ForecastStrip hourly={memoizedForecast?.hourly} />
+          <ForecastStrip 
+            hourly={memoizedForecast?.hourly} 
+            onCardClick={(hourData) => setSelectedCard({ type: 'hourly', data: hourData, title: `Hourly Detail - ${hourData.time}` })}
+          />
         )}
 
         {/* Divider */}
@@ -110,7 +186,11 @@ export default function Forecast() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             {memoizedForecast?.daily?.map((day) => (
-              <DayForecastCard key={day.date} {...day} />
+              <DayForecastCard 
+                key={day.date} 
+                {...day} 
+                onClick={() => setSelectedCard({ type: 'daily', data: day, title: `${day.day || day.short_day} Forecast` })}
+              />
             ))}
           </div>
         )}
@@ -124,6 +204,14 @@ export default function Forecast() {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+        title={selectedCard?.title || "Details"}
+      >
+        {getModalContent()}
+      </Modal>
     </div>
   );
 }

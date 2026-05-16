@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import UnitToggle from '../ui/UnitToggle';
 import ThemeToggle from '../ui/ThemeToggle';
 import SearchOverlay from '../ui/SearchOverlay';
+import CitySearch from './CitySearch';
 import api from '../../services/api';
 import { useEffect, useRef } from 'react';
 
@@ -99,19 +100,24 @@ export default function TopBar({ title, subtitle, children }) {
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Search */}
+          {/* City Selector */}
+          <div className="hidden md:block flex-1 max-w-xs mx-4">
+            <CitySearch />
+          </div>
+
+          {/* AI Question Search */}
           <div className="relative group hidden xl:block" ref={searchRef}>
             <span className="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary" aria-hidden="true">
-              <span className="material-symbols-outlined">search</span>
+              <span className="material-symbols-outlined">psychology</span>
             </span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
-              className="bg-surface-container-low border-none rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60 transition-all focus:w-80"
-              placeholder="Ask anything about weather..."
-              aria-label="Search weather data"
+              className="bg-white/5 border border-white/10 rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60 transition-all focus:w-80 backdrop-blur-md"
+              placeholder="Ask AI about weather..."
+              aria-label="Ask AI weather question"
             />
             
             <SearchOverlay 

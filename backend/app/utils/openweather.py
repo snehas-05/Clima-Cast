@@ -76,6 +76,11 @@ class OpenWeatherAPI:
             }
         return None
 
+    async def search_cities(self, query: str, limit: int = 5) -> Optional[list]:
+        url = f"{GEO_URL}/direct"
+        params = {"q": query, "limit": limit}
+        return await self._get(url, params)
+
     async def get_air_quality(self, lat: float, lon: float) -> Optional[Dict[str, Any]]:
         url = f"{BASE_URL}/air_pollution"
         params = {"lat": lat, "lon": lon}
