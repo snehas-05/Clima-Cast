@@ -17,6 +17,23 @@ export default function TopBar({ title, subtitle, children }) {
   const [searchQuery, setSearchQuery] = useState('');
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      console.log(`Searching for: ${searchQuery}`);
+      // For now, we can show an alert or navigate if we had a search page
+      // But let's just log and clear for now, or simulate a search
+      alert(`Search feature: Looking up data for "${searchQuery}"...`);
+      setSearchQuery('');
+    }
+  };
+
+  const notifications = [
+    { id: 1, text: "High temperature warning in your area", time: "2h ago", icon: "warning" },
+    { id: 2, text: "Rain expected tomorrow morning", time: "5h ago", icon: "rainy" },
+    { id: 3, text: "Air quality is now Moderate", time: "1d ago", icon: "air" },
+  ];
 
   return (
     <header className="sticky top-0 z-40 glass-topbar">
@@ -50,6 +67,7 @@ export default function TopBar({ title, subtitle, children }) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
               className="bg-surface-container-low border-none rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60"
               placeholder="Search data..."
               aria-label="Search weather data"
@@ -57,7 +75,38 @@ export default function TopBar({ title, subtitle, children }) {
           </div>
 
           {/* Notification */}
-          <IconButton icon="notifications" ariaLabel="View notifications" />
+          <div className="relative">
+            <IconButton 
+              icon="notifications" 
+              ariaLabel="View notifications" 
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                setShowDropdown(false);
+              }}
+            />
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-3 border-b border-outline-variant/30 bg-surface-container-low flex justify-between items-center">
+                  <h3 className="text-body-main font-bold text-on-surface">Notifications</h3>
+                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">3 NEW</span>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map(n => (
+                    <div key={n.id} className="px-4 py-3 hover:bg-surface-container transition-colors cursor-pointer border-b border-outline-variant/10 last:border-0 flex gap-3">
+                      <span className="material-symbols-outlined text-primary text-xl">{n.icon}</span>
+                      <div>
+                        <p className="text-body-sm text-on-surface line-clamp-2">{n.text}</p>
+                        <p className="text-[10px] text-on-surface-variant mt-1">{n.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="w-full py-2 text-center text-label-caps text-primary hover:bg-primary/5 transition-colors border-t border-outline-variant/30">
+                  View All Alerts
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className="h-8 w-px bg-outline-variant/30 mx-1 hidden sm:block" />
 
@@ -65,7 +114,10 @@ export default function TopBar({ title, subtitle, children }) {
           <div className="relative">
             <button 
               className="flex items-center gap-3 cursor-pointer group focus:outline-none"
-              onClick={() => setShowDropdown(!showDropdown)}
+              onClick={() => {
+                setShowDropdown(!showDropdown);
+                setShowNotifications(false);
+              }}
               aria-label="User profile menu"
               aria-expanded={showDropdown}
               aria-haspopup="true"
@@ -82,7 +134,7 @@ export default function TopBar({ title, subtitle, children }) {
 
             {showDropdown && (
               <div 
-                className="absolute right-0 mt-2 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50"
+                className="absolute right-0 mt-2 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
                 role="menu"
                 aria-orientation="vertical"
               >
@@ -90,6 +142,27 @@ export default function TopBar({ title, subtitle, children }) {
                   <p className="text-body-main font-semibold text-on-surface" role="none">{user?.name}</p>
                   <p className="text-label-caps text-on-surface-variant truncate" role="none">{user?.email}</p>
                 </div>
+                <button 
+                  className="w-full text-left px-4 py-2 text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors"
+                  onClick={() => {
+                    alert("Navigating to Profile...");
+                    setShowDropdown(false);
+                  }}
+                >
+                  <span className="material-symbols-outlined text-[18px]">account_circle</span>
+                  Profile
+                </button>
+                <button 
+                  className="w-full text-left px-4 py-2 text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors"
+                  onClick={() => {
+                    alert("Opening Security Settings...");
+                    setShowDropdown(false);
+                  }}
+                >
+                  <span className="material-symbols-outlined text-[18px]">security</span>
+                  Security
+                </button>
+                <div className="h-px bg-outline-variant/30 my-1" />
                 <button 
                   onClick={logout}
                   role="menuitem"

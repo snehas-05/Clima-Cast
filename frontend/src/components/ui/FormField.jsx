@@ -8,6 +8,7 @@ export default function FormField({
   value,
   onChange,
   rightElement,
+  autoComplete,
   className = '',
 }) {
   return (
@@ -33,6 +34,7 @@ export default function FormField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           className={`w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3 bg-white/50 border border-outline-variant/30
             rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none
             transition-all placeholder:text-on-surface-variant/30 text-body-main`}

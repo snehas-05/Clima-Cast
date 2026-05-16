@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
   { to: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
@@ -18,6 +19,17 @@ const bottomItems = [
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
+  const { logout } = useAuth();
+
+  const handleAction = (action) => {
+    if (action === 'logout') {
+      logout();
+    } else if (action === 'support') {
+      alert("Opening Support Hub...");
+    }
+    if (onClose) onClose();
+  };
+
   return (
     <>
       {/* Mobile overlay */}
@@ -59,8 +71,8 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                 ${isActive
-                  ? 'bg-secondary-container/10 border-l-4 border-primary text-primary font-semibold'
-                  : 'text-on-surface-variant hover:bg-secondary-container/5 hover:text-primary'
+                   ? 'bg-secondary-container/10 border-l-4 border-primary text-primary font-semibold'
+                   : 'text-on-surface-variant hover:bg-secondary-container/5 hover:text-primary'
                 }`
               }
             >
@@ -89,11 +101,12 @@ export default function Sidebar({ isOpen, onClose }) {
           {bottomItems.map(({ icon, label, action }) => (
             <button
               key={action}
+              onClick={() => handleAction(action)}
               aria-label={label}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                 ${action === 'logout'
-                  ? 'text-on-surface-variant hover:text-error'
-                  : 'text-on-surface-variant hover:text-primary'
+                   ? 'text-on-surface-variant hover:text-error'
+                   : 'text-on-surface-variant hover:text-primary'
                 }`}
             >
               <span className="material-symbols-outlined" aria-hidden="true">{icon}</span>

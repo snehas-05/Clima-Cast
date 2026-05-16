@@ -88,6 +88,7 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)) -> Any:
             }
         )
     except Exception as e:
+        print(f"Login error: {e}")
         return StandardResponse(
             success=False,
             message="An error occurred during login",

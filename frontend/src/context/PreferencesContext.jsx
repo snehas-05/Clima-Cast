@@ -70,12 +70,12 @@ export const PreferencesProvider = ({ children }) => {
     }
   };
 
-  const setTheme = (theme) => savePreferences({ theme });
-  const setUnit = (unit) => savePreferences({ unit });
-  const toggleConfidence = () => savePreferences({ showConfidence: !preferences.showConfidence });
+  const updateTheme = (theme) => savePreferences({ theme });
+  const updateUnit = (unit) => savePreferences({ unit });
+  const updateConfidence = (showConfidence) => savePreferences({ showConfidence });
 
   return (
-    <PreferencesContext.Provider value={{ ...preferences, setTheme, setUnit, toggleConfidence }}>
+    <PreferencesContext.Provider value={{ ...preferences, updateTheme, updateUnit, updateConfidence }}>
       {children}
     </PreferencesContext.Provider>
   );

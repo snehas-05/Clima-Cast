@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component {
               </Button>
               <Button 
                 variant="ghost" 
-                onClick={() => window.location.href = '/'}
+                onClick={() => window.location.href = '/dashboard'}
                 className="w-full py-4 rounded-xl"
               >
                 Go to Dashboard

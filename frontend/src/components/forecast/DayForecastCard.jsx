@@ -1,5 +1,8 @@
+import React from 'react';
 import { usePreferences } from '../../context/PreferencesContext';
 import { formatTemp } from '../../utils/temperature';
+import WeatherIcon from './WeatherIcon';
+import RainProbabilityBar from './RainProbabilityBar';
 
 const DayForecastCard = ({ 
   date, 

@@ -1,3 +1,4 @@
+import { useOutletContext } from 'react-router-dom';
 import FeatureItem from '../components/cards/FeatureItem';
 import Button from '../components/ui/Button';
 
@@ -9,6 +10,8 @@ const values = [
 ];
 
 export default function About() {
+  const { handleContactSales: handlePartnerClick } = useOutletContext();
+
   return (
     <div className="mesh-gradient min-h-screen">
       {/* Hero */}
@@ -93,7 +96,11 @@ export default function About() {
               <p className="text-body-lg text-secondary-fixed/80 leading-relaxed">
                 Beyond commercial analytics, Clima-Cast is committed to environmental stewardship. We provide our advanced modeling tools to non-profit organizations fighting desertification and coastal erosion.
               </p>
-              <Button variant="ghost" className="mt-8 bg-white text-primary hover:bg-secondary-fixed border-none">
+              <Button 
+                variant="ghost" 
+                className="mt-8 bg-white text-primary hover:bg-secondary-fixed border-none"
+                onClick={handlePartnerClick}
+              >
                 Partner with Us
               </Button>
             </div>

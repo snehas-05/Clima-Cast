@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import FeatureItem from '../components/cards/FeatureItem';
 
