@@ -52,36 +52,45 @@ def get_historical_context(city: str, alert_type: str, month: int) -> str:
         if city_df.empty:
             return f"First recorded data for {city} in this month."
 
-        # Since we might not have multiple years in the CSV (it might be a snapshot), 
-        # let's calculate based on unique days if we had a full year, 
-        # or just provide stats from the available sample.
-        
-        total_days = len(city_df['date_dt'].dt.date.unique())
-        
         if alert_type == 'heatwave':
-            # Threshold > 40C
             hot_days = len(city_df[city_df['temperature_celsius'] > 40]['date_dt'].dt.date.unique())
-            if hot_days == 0:
-                return f"Heatwaves are extremely rare for {city} in this month historically."
-            avg = hot_days # If snapshot is one month
-            return f"This city historically averages {avg} heatwave days in this month."
+            return f"Historically rare for {city} in this month." if hot_days == 0 else f"Averages {hot_days} high-heat days this month."
             
         elif alert_type == 'storm':
-            # Threshold wind > 60kph
             storm_days = len(city_df[city_df['wind_kph'] > 60]['date_dt'].dt.date.unique())
-            if storm_days == 0:
-                return f"Severe storms are uncommon for {city} in this month."
-            return f"This city records about {storm_days} storm-level wind events in this month."
+            return f"Severe storms are uncommon for {city} in this month." if storm_days == 0 else f"Records ~{storm_days} storm events this month."
             
         elif alert_type == 'coldwave':
-            # Threshold < 5C
             cold_days = len(city_df[city_df['temperature_celsius'] < 5]['date_dt'].dt.date.unique())
-            if cold_days == 0:
-                return f"Coldwaves are historically rare for {city} in this month."
-            return f"This city typically see {cold_days} coldwave days in this month."
+            return f"Coldwaves are rare for {city} in this month." if cold_days == 0 else f"Typically sees {cold_days} coldwave days this month."
             
-        return "Historical weather patterns for this city remain stable."
+        return "Stable historical baseline."
         
     except Exception as e:
         logger.error(f"Error calculating historical context: {e}")
-        return "Context calculation failed."
+        return "Context unavailable."
+
+def get_seasonal_grounding(city: str, month: int) -> Dict[str, Any]:
+    """
+    Provides average weather metrics for a city and month for anomaly comparison.
+    """
+    df = _get_df_global()
+    if df is None: return {}
+
+    try:
+        city_df = df[
+            (df['location_name'].str.lower() == city.lower()) &
+            (df['date_dt'].dt.month == month)
+        ]
+        
+        if city_df.empty: return {}
+
+        return {
+            "avg_temp": float(city_df['temperature_celsius'].mean()),
+            "avg_hum": float(city_df['humidity'].mean()),
+            "avg_pressure": float(city_df['pressure_mb'].mean()),
+            "count": len(city_df)
+        }
+    except Exception as e:
+        logger.error(f"Error in seasonal grounding: {e}")
+        return {}

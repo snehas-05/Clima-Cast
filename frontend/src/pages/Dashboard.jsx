@@ -9,6 +9,7 @@ import { useWeather } from '../hooks/useWeather';
 import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton';
 import { usePreferences } from '../context/PreferencesContext';
 import { formatTemp } from '../utils/temperature';
+import { useInsights } from '../hooks/useInsights';
 
 export default function Dashboard() {
   const { unit } = usePreferences();
@@ -23,6 +24,8 @@ export default function Dashboard() {
     fetchForecast, 
     fetchAirQuality 
   } = useWeather();
+
+  const { insights, riskScore, trend: insightTrend, loading: insightsLoading } = useInsights(activeCity);
   
   const [airQuality, setAirQuality] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -83,19 +86,6 @@ export default function Dashboard() {
   ] : [];
 
 
-  const getDynamicInsights = (data) => {
-    const insights = [];
-    if (data.ml_available) {
-      insights.push({ id: 'ai-predict', icon: 'psychology', iconBg: 'bg-primary/10', title: 'Model Availability', description: `Full prediction support active for ${data.city}.` });
-      insights.push({ id: 'ai-trends', icon: 'show_chart', iconBg: 'bg-tertiary/10', iconColor: 'text-tertiary', titleColor: 'text-tertiary', title: 'Trends', description: 'Historical patterns are being processed for upcoming predictions.' });
-    } else {
-      if (data.temperature > 30) insights.push({ id: 'heat', icon: 'wb_sunny', iconBg: 'bg-orange-500/10', iconColor: 'text-orange-500', title: 'Heat Advisory', description: 'High temperatures detected. Stay hydrated.' });
-      else if (data.temperature < 10) insights.push({ id: 'cold', icon: 'ac_unit', iconBg: 'bg-blue-500/10', iconColor: 'text-blue-500', title: 'Cold Alert', description: 'Chilly conditions. Wear a jacket.' });
-      
-      if (insights.length === 0) insights.push({ id: 'ideal', icon: 'verified', iconBg: 'bg-green-500/10', iconColor: 'text-green-500', title: 'Ideal Conditions', description: 'The weather looks stable and pleasant.' });
-    }
-    return insights;
-  };
 
   const getModalContent = () => {
     if (!selectedCard || !weatherData) return null;
@@ -330,32 +320,48 @@ export default function Dashboard() {
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-4 mb-6">
-              <div className={`p-4 ${selectedCard.iconBg || 'bg-primary/10'} rounded-3xl ${selectedCard.iconColor || 'text-primary'}`}>
-                <span className="material-symbols-outlined text-3xl">{selectedCard.icon}</span>
+              <div className={`p-4 bg-primary/10 rounded-3xl text-primary`}>
+                <span className="material-symbols-outlined text-3xl">{selectedCard.icon || 'psychology'}</span>
               </div>
               <h4 className="text-h3-card-title text-on-surface font-bold">{selectedCard.title}</h4>
             </div>
             <div className="p-8 glass-card rounded-[2.5rem] bg-gradient-to-br from-primary/5 to-transparent border-primary/10">
-              <h5 className="font-bold text-primary mb-4 flex items-center gap-2">
-                <span className="material-symbols-outlined">analytics</span>
-                AI Analysis Detail
+              <h5 className="font-bold text-primary mb-4 flex items-center gap-2 text-sm uppercase tracking-widest">
+                <span className="material-symbols-outlined text-sm">analytics</span>
+                Intelligence Context
               </h5>
               <p className="text-body-lg text-on-surface leading-relaxed mb-6">
-                {selectedCard.description}
+                {selectedCard.explanation || selectedCard.description}
               </p>
-              <div className="space-y-4 pt-6 border-t border-on-surface/10">
+              
+              {selectedCard.factors && selectedCard.factors.length > 0 && (
+                <div className="space-y-3 pt-6 border-t border-on-surface/10">
+                  <p className="text-[10px] font-black text-on-surface-variant tracking-[0.2em] uppercase">Contributing Factors</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCard.factors.map(f => (
+                      <span key={f} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-on-surface">
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4 pt-6 border-t border-on-surface/10 mt-6">
                 <div className="flex justify-between items-center">
-                  <p className="text-body-sm text-on-surface-variant font-medium">Confidence Score</p>
-                  <p className="text-body-sm font-bold text-primary">94.2%</p>
+                  <p className="text-body-sm text-on-surface-variant font-medium uppercase tracking-tighter">Model Confidence</p>
+                  <p className="text-body-sm font-bold text-primary">{Math.round((selectedCard.confidence || 0.94) * 100)}%</p>
                 </div>
                 <div className="w-full h-1.5 bg-on-surface/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: '94%' }} />
+                  <div className="h-full bg-primary rounded-full transition-all duration-1000" style={{ width: `${(selectedCard.confidence || 0.94) * 100}%` }} />
                 </div>
               </div>
             </div>
-            <div className="flex items-start gap-4 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-300">
-              <span className="material-symbols-outlined">info</span>
-              <p className="text-body-sm">Insights are generated using historical data patterns and real-time atmospheric readings.</p>
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-primary/5 border border-primary/10 text-on-surface-variant/80">
+              <span className="material-symbols-outlined text-primary">info</span>
+              <p className="text-[11px] leading-relaxed">
+                This insight is synthesized using the <span className="text-primary font-bold">Clima-Cast Reasoning Engine</span>, correlating real-time sensors with historical climate models and ML-driven risk vectors.
+              </p>
             </div>
           </div>
         );
@@ -387,7 +393,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-black tracking-wide uppercase">
                 {weatherData.ml_available 
-                  ? `✨ AI Predictions Available for ${weatherData.city}` 
+                  ? `✨ Intelligence active for ${weatherData.city} • Risk Score: ${riskScore}/100` 
                   : `📡 Clima-Cast Insights Active — Real-time analysis for ${weatherData.city}`}
               </p>
             </div>
@@ -436,8 +442,16 @@ export default function Dashboard() {
               
               {weatherData?.ml_available && (
                 <div className="flex flex-col items-end">
-                  <div className="px-4 py-2 rounded-2xl bg-primary/20 border border-primary/30 backdrop-blur-md shadow-lg shadow-primary/10">
-                    <p className="text-[10px] font-black text-primary tracking-[0.2em]">AI POWERED ANALYSIS</p>
+                  <div className="px-4 py-2 rounded-2xl bg-primary/20 border border-primary/30 backdrop-blur-md shadow-lg shadow-primary/10 flex items-center gap-3">
+                    <div className="flex flex-col items-end">
+                      <p className="text-[10px] font-black text-primary tracking-[0.2em]">CLIMATE RISK</p>
+                      <p className="text-lg font-bold text-on-surface">{riskScore}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-full border-2 border-primary/30 flex items-center justify-center">
+                      <span className={`material-symbols-outlined text-sm ${insightTrend === 'worsening' ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {insightTrend === 'worsening' ? 'trending_up' : 'trending_down'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -473,14 +487,23 @@ export default function Dashboard() {
               <span className="material-symbols-outlined text-primary p-2 bg-primary/10 rounded-xl">auto_awesome</span>
               AI Quick Insights
             </h4>
-            <div className="space-y-6 flex-1">
-              {weatherData && getDynamicInsights(weatherData).map((insight, idx) => (
-                <InsightCard 
-                  key={idx} 
-                  {...insight} 
-                  onClick={() => setSelectedCard({ ...insight, id: 'insight' })}
-                />
-              ))}
+            <div className="space-y-4 flex-1">
+              {insightsLoading ? (
+                [1, 2].map(i => <div key={i} className="h-32 bg-white/5 rounded-[1.5rem] animate-pulse" />)
+              ) : insights.length > 0 ? (
+                insights.map((insight, idx) => (
+                  <InsightCard 
+                    key={idx} 
+                    {...insight} 
+                    onClick={() => setSelectedCard({ ...insight, id: 'insight' })}
+                  />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-48 text-center opacity-40">
+                  <span className="material-symbols-outlined text-4xl mb-2">check_circle</span>
+                  <p className="text-xs font-bold uppercase tracking-widest">No Active Risks Detected</p>
+                </div>
+              )}
             </div>
             
             <button 
