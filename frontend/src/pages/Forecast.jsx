@@ -25,21 +25,24 @@ export default function Forecast() {
 
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Fetch forecast once city or coords are available from context
-  useEffect(() => {
-    const loadForecast = async () => {
-      if (coordinates) {
-        // If we have coords, we might need to resolve city first for forecast if backend requires it
-        // Or backend can handle /forecast?lat=...&lon=...
-        // For now, WeatherContext handles resolving city from coords, so activeCity should eventually update.
-        if (activeCity) fetchForecast(activeCity);
-      } else if (activeCity) {
-        fetchForecast(activeCity);
-      }
-    };
+  // Unified Orchestration Callback
+  const loadForecast = useCallback(async () => {
+    if (!activeCity) return;
+    
+    // We prioritize city-based forecast for the UI
+    fetchForecast(activeCity);
+    
+    // Also sync current weather in background for summary consistency
+    if (coordinates) {
+      fetchWeather({ lat: coordinates.lat, lon: coordinates.lon });
+    } else {
+      fetchWeather({ city: activeCity });
+    }
+  }, [activeCity, coordinates, fetchForecast, fetchWeather]);
 
+  useEffect(() => {
     loadForecast();
-  }, [activeCity, coordinates, fetchForecast]);
+  }, [loadForecast]);
 
   // 3. Memoize grouped forecast calculations
   const memoizedForecast = useMemo(() => {

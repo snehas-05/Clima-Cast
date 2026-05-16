@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import ChartContainer from './ChartContainer';
+import { usePreferences } from '../../context/PreferencesContext';
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label, unitLabel }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white/90 backdrop-blur-md p-4 border border-outline-variant/30 rounded-2xl shadow-xl">
@@ -11,7 +12,7 @@ const CustomTooltip = ({ active, payload, label }) => {
           <div key={index} className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
             <span className="text-body-main font-semibold text-on-surface">
-              {entry.name}: {entry.value.toFixed(1)}°C
+              {entry.name}: {entry.value.toFixed(1)}{unitLabel}
             </span>
           </div>
         ))}
@@ -22,6 +23,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function TempTrendChart({ data, loading }) {
+  const { unit } = usePreferences();
+  const unitLabel = unit === 'celsius' ? '°C' : '°F';
   if (loading) {
     return (
       <ChartContainer title="Temperature Trends" subtitle="Annual average, maximum, and minimum temperatures">
@@ -71,9 +74,9 @@ export default function TempTrendChart({ data, loading }) {
               axisLine={false} 
               tickLine={false} 
               tick={{ fill: '#64748B', fontSize: 12 }}
-              unit="°C"
+              unit={unitLabel}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip unitLabel={unitLabel} />} />
             <Legend verticalAlign="top" height={36}/>
             <Line 
               type="monotone" 

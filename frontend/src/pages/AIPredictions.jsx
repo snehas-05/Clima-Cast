@@ -8,6 +8,16 @@ import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton'
 import { useWeather } from '../hooks/useWeather';
 import { usePreferences } from '../context/PreferencesContext';
 import { formatTemp } from '../utils/temperature';
+import AnimatedCard from '../components/ui/AnimatedCard';
+import { TRANSITIONS, TIMING, EASING } from '../utils/motion';
+
+const containerVariants = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 const heroStats = [
   { label: 'CONFIDENCE', key: 'confidence', sub: 'Neural Mesh Active' },
@@ -15,14 +25,17 @@ const heroStats = [
   { label: 'LATENCY', key: 'latency', sub: 'Inference Speed' },
 ];
 
-const PredictionCard = ({ title, icon, value, subValue, explanation, loading, trend, colorClass = "text-primary" }) => (
-  <div className="glass-card rounded-[1.5rem] p-7 border border-white/10 space-y-5 hover:border-primary/40 transition-all duration-300">
-    <div className="flex items-center justify-between">
+const PredictionCard = ({ title, icon, value, subValue, explanation, loading, trend, colorClass = "text-primary", delay = 0 }) => (
+  <AnimatedCard 
+    delay={delay}
+    className="p-7 space-y-5 border-white/10"
+  >
+    <div className="flex items-center justify-between relative z-10">
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-xl bg-opacity-10 ${colorClass.replace('text-', 'bg-')}`}>
           <span className={`material-symbols-outlined ${colorClass}`}>{icon}</span>
         </div>
-        <p className="text-label-caps text-on-surface-variant">{title}</p>
+        <p className="text-label-caps text-on-surface-variant tracking-widest">{title}</p>
       </div>
       {trend && (
         <span className={`material-symbols-outlined ${trend === 'up' ? 'text-error' : trend === 'down' ? 'text-success' : 'text-on-surface-variant'}`}>
@@ -31,7 +44,7 @@ const PredictionCard = ({ title, icon, value, subValue, explanation, loading, tr
       )}
     </div>
     
-    <div>
+    <div className="relative z-10">
       {loading ? (
         <LoadingSkeleton height="2.5rem" width="60%" />
       ) : (
@@ -43,18 +56,19 @@ const PredictionCard = ({ title, icon, value, subValue, explanation, loading, tr
     </div>
 
     {explanation && explanation.length > 0 && (
-      <div className="space-y-2 pt-2 border-t border-outline-variant/30">
-        <p className="text-[10px] text-label-caps text-on-surface-variant">WHY THIS PREDICTION?</p>
+      <div className="space-y-2 pt-4 border-t border-white/5 relative z-10">
+        <p className="text-[10px] text-label-caps text-on-surface-variant tracking-widest font-black">WHY THIS PREDICTION?</p>
         {explanation.map((item, idx) => (
-          <div key={idx} className="space-y-1">
-            <div className="flex justify-between text-[11px] text-on-surface">
+          <div key={idx} className="space-y-1.5">
+            <div className="flex justify-between text-[11px] text-on-surface font-medium">
               <span className="capitalize">{item.feature.replace('_', ' ')}</span>
-              <span>{Math.round(item.contribution * 100)}%</span>
+              <span className="text-primary">{Math.round(item.contribution * 100)}%</span>
             </div>
-            <div className="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min(Math.abs(item.contribution) * 100, 100)}%` }}
+                transition={{ duration: 1, delay: delay + 0.5, ease: EASING.CINEMATIC }}
                 className={`h-full ${item.contribution > 0 ? 'bg-primary' : 'bg-tertiary'}`}
               />
             </div>
@@ -62,7 +76,8 @@ const PredictionCard = ({ title, icon, value, subValue, explanation, loading, tr
         ))}
       </div>
     )}
-  </div>
+    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/5 blur-3xl rounded-full" />
+  </AnimatedCard>
 );
 
 export default function AIPredictions() {
@@ -178,7 +193,12 @@ export default function AIPredictions() {
     <>
       <TopBar title="AI Predictions" subtitle={`Neural Forecasting Engine — ${city}`} />
       
-      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]">
+      <motion.div 
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+        className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]"
+      >
         
         {/* City Search & Last Updated */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -247,7 +267,11 @@ export default function AIPredictions() {
         )}
 
         {/* Hero Card */}
-        <div className="glass-card rounded-3xl p-8 relative overflow-hidden">
+        <AnimatedCard 
+          className="p-8 border-white/5"
+          noHover
+          delay={0.2}
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -289,7 +313,7 @@ export default function AIPredictions() {
               </div>
             </div>
           </div>
-        </div>
+        </AnimatedCard>
 
         {/* Prediction Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[var(--spacing-card-gap)]">
@@ -334,6 +358,7 @@ export default function AIPredictions() {
             explanation={predictions.alerts?.explanation}
             loading={loading}
             colorClass={isMLAvailable && predictions.alerts?.prediction?.alert_type !== 'normal' ? 'text-error' : 'text-success'}
+            delay={0.6}
           />
         </div>
 
@@ -369,7 +394,7 @@ export default function AIPredictions() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
@@ -440,10 +465,26 @@ function TrendChart({ data }) {
       <div className="flex-1 min-h-0">
         <svg className="w-full h-full" viewBox="0 0 800 220" preserveAspectRatio="none">
           {/* Confidence Area */}
-          <path d={areaPath} fill="rgba(192, 132, 252, 0.1)" stroke="none" />
+          <motion.path 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.5 }}
+            d={areaPath} 
+            fill="rgba(192, 132, 252, 0.08)" 
+            stroke="none" 
+          />
           
           {/* Prediction Line */}
-          <path d={linePath} fill="none" stroke="var(--color-primary)" strokeWidth="3" strokeLinecap="round" />
+          <motion.path 
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 2, ease: EASING.CINEMATIC, delay: 0.3 }}
+            d={linePath} 
+            fill="none" 
+            stroke="var(--color-primary)" 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+          />
           
           {/* Dots */}
           {chartData.map((d, i) => (

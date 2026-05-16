@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TIMING, EASING } from '../../utils/motion';
 
 export default function Modal({ isOpen, onClose, title, children }) {
   useEffect(() => {
@@ -12,47 +14,49 @@ export default function Modal({ isOpen, onClose, title, children }) {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-md transition-opacity duration-300 animate-fade-in"
-        onClick={onClose}
-      />
-      
-      {/* Modal Content */}
-      <div className="relative w-full max-w-2xl glass-card rounded-[2.5rem] p-8 md:p-10 shadow-2xl overflow-hidden animate-fade-in scale-up">
-        {/* Decorative background element */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[80px] -mr-32 -mt-32 rounded-full pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-h2-dashboard text-on-surface">{title}</h2>
-            <button 
-              onClick={onClose}
-              className="p-2 hover:bg-on-surface/10 rounded-full transition-colors flex items-center justify-center"
-            >
-              <span className="material-symbols-outlined text-on-surface text-2xl">close</span>
-            </button>
-          </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: TIMING.MEDIUM, ease: EASING.SOFT }}
+            className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
+            onClick={onClose}
+          />
           
-          <div className="custom-scrollbar max-h-[70vh] overflow-y-auto pr-2">
-            {children}
-          </div>
+          {/* Modal Content */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+            transition={{ duration: TIMING.MEDIUM, ease: EASING.CINEMATIC }}
+            className="relative w-full max-w-2xl glass-card rounded-[2.5rem] p-8 md:p-10 shadow-2xl overflow-hidden"
+          >
+            {/* Decorative background element */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] -mr-32 -mt-32 rounded-full pointer-events-none" />
+            
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-h2-dashboard text-on-surface">{title}</h2>
+                <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-on-surface/10 rounded-full transition-colors flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-on-surface text-2xl">close</span>
+                </button>
+              </div>
+              
+              <div className="custom-scrollbar max-h-[70vh] overflow-y-auto pr-2">
+                {children}
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
-      
-      <style>{`
-        @keyframes scaleUp {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .scale-up {
-          animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-      `}</style>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }

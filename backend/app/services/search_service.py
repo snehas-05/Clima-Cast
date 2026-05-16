@@ -8,7 +8,7 @@ from app.models.preferences import UnitType
 
 class SearchService:
     @staticmethod
-    async def perform_search(db: Session, query: str, city: Optional[str] = "Ludhiana", user: Optional[Any] = None) -> Dict[str, Any]:
+    async def perform_search(db: Session, query: str, city: Optional[str] = None, user: Optional[Any] = None) -> Dict[str, Any]:
         query_lower = query.lower()
         
         unit_label = "°C"
@@ -25,7 +25,7 @@ class SearchService:
                 "What is the temperature today?",
                 "Will it rain tomorrow?",
                 "Show me the 5-day forecast",
-                "Air quality index in Ludhiana"
+                "Air quality index"
             ],
             "success": True
         }
@@ -39,6 +39,10 @@ class SearchService:
                 break
         
         target_city = found_city or city
+
+        if not target_city:
+            response["answer"] = "I need a location to answer that. Please select a city or search for one."
+            return response
 
         # 2. Fetch data if needed
         weather_data = await WeatherService.get_current_weather(db, target_city, user)

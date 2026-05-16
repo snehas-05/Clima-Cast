@@ -7,6 +7,8 @@ import CitySearch from './CitySearch';
 import api from '../../services/api';
 import { useEffect, useRef } from 'react';
 
+import { useWeatherContext } from '../../context/WeatherContext';
+
 const IconButton = ({ icon, onClick, ariaLabel }) => (
   <button 
     onClick={onClick}
@@ -18,6 +20,7 @@ const IconButton = ({ icon, onClick, ariaLabel }) => (
 );
 
 export default function TopBar({ title, subtitle, children }) {
+  const { activeCity } = useWeatherContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -36,18 +39,9 @@ export default function TopBar({ title, subtitle, children }) {
     setSearchLoading(true);
     setSearchResults(null);
     
-    // Try to extract city from subtitle or localStorage
-    let contextCity = "Ludhiana";
-    if (subtitle && subtitle !== "Atmospheric Outlook" && subtitle !== "Real-Time Overview") {
-      contextCity = subtitle;
-    } else {
-      const lastCity = localStorage.getItem('last_searched_city');
-      if (lastCity) contextCity = lastCity;
-    }
-
     try {
       const response = await api.get('/search', {
-        params: { q: query, city: contextCity }
+        params: { q: query, city: activeCity }
       });
       setSearchResults(response.data);
     } catch (err) {

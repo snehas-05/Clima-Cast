@@ -1,16 +1,14 @@
-import React from 'react';
-import WeatherIcon from './WeatherIcon';
-import { usePreferences } from '../../context/PreferencesContext';
-import { formatTemp } from '../../utils/temperature';
+import { motion } from 'framer-motion';
+import { TRANSITIONS, EASING, TIMING } from '../../utils/motion';
 
 const conditionGradients = {
-  sunny: 'from-amber-400/20 via-orange-500/10 to-transparent',
-  clear: 'from-blue-400/20 via-sky-500/10 to-transparent',
-  clouds: 'from-slate-400/20 via-gray-500/10 to-transparent',
-  cloudy: 'from-slate-400/20 via-gray-500/10 to-transparent',
-  rain: 'from-blue-600/20 via-indigo-700/10 to-transparent',
-  thunderstorm: 'from-purple-600/20 via-slate-900/10 to-transparent',
-  snow: 'from-cyan-100/20 via-blue-200/10 to-transparent',
+  sunny: 'from-amber-400/20 via-orange-500/5 to-transparent',
+  clear: 'from-blue-400/20 via-sky-500/5 to-transparent',
+  clouds: 'from-slate-400/20 via-gray-500/5 to-transparent',
+  cloudy: 'from-slate-400/20 via-gray-500/5 to-transparent',
+  rain: 'from-blue-600/20 via-indigo-700/5 to-transparent',
+  thunderstorm: 'from-purple-600/20 via-slate-900/5 to-transparent',
+  snow: 'from-cyan-100/20 via-blue-200/5 to-transparent',
 };
 
 const TodaySummary = ({ city, today, onClick }) => {
@@ -20,8 +18,10 @@ const TodaySummary = ({ city, today, onClick }) => {
   const gradientClass = conditionGradients[today.condition?.toLowerCase()] || conditionGradients.clear;
 
   return (
-    <div 
-      className={`glass-card rounded-[2.5rem] p-10 relative overflow-hidden transition-all duration-500 bg-gradient-to-br ${gradientClass} border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] group ${onClick ? 'cursor-pointer hover:scale-[1.01] active:scale-[0.99]' : ''}`}
+    <motion.div 
+      initial={TRANSITIONS.SOFT_REVEAL.initial}
+      animate={TRANSITIONS.SOFT_REVEAL.animate}
+      className={`glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden bg-gradient-to-br ${gradientClass} border border-white/5 shadow-2xl group ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
       <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
@@ -36,13 +36,13 @@ const TodaySummary = ({ city, today, onClick }) => {
           <span className="text-label-caps text-primary tracking-[0.3em] font-bold">{city?.toUpperCase()}</span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-end gap-8 mb-10">
-          <h2 className="text-[100px] font-black tracking-tighter leading-none bg-gradient-to-b from-on-surface to-on-surface/60 bg-clip-text text-transparent">
+        <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-10 mb-10">
+          <h2 className="text-[80px] md:text-[120px] font-black tracking-tighter leading-none bg-gradient-to-b from-on-surface to-on-surface/40 bg-clip-text text-transparent">
             {formatTemp(today.high, unit)}°
           </h2>
-          <div className="pb-4">
-            <p className="text-3xl font-bold text-on-surface mb-2">{today.condition || '--'}</p>
-            <p className="text-on-surface-variant/80 font-medium text-lg italic">"{today.description || '--'}"</p>
+          <div className="pb-2 md:pb-6">
+            <p className="text-2xl md:text-4xl font-bold text-on-surface mb-2">{today.condition || '--'}</p>
+            <p className="text-on-surface-variant/60 font-medium text-base md:text-lg italic tracking-wide">"{today.description || '--'}"</p>
           </div>
         </div>
 
@@ -67,7 +67,8 @@ const TodaySummary = ({ city, today, onClick }) => {
           </div>
         </div>
       </div>
-    </div>
+      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-primary/5 blur-[100px] rounded-full group-hover:bg-primary/10 transition-colors duration-1000" />
+    </motion.div>
 
   );
 };

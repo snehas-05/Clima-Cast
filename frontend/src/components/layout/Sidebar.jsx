@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TIMING, EASING } from '../../utils/motion';
 
 const navItems = [
   { to: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
@@ -32,42 +34,57 @@ export default function Sidebar({ isOpen, onClose }) {
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
-          onClick={onClose}
-          role="button"
-          aria-label="Close sidebar menu"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && onClose()}
-        />
-      )}
+      <AnimatePresence>
+        {/* Mobile overlay */}
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: TIMING.MEDIUM }}
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-40 lg:hidden"
+            onClick={onClose}
+            role="button"
+            aria-label="Close sidebar menu"
+          />
+        )}
+      </AnimatePresence>
 
-      <aside
+      <motion.aside
+        initial={false}
+        animate={{ 
+          x: isOpen ? 0 : (window.innerWidth < 1024 ? -280 : 0)
+        }}
+        drag={window.innerWidth < 1024 ? "x" : false}
+        dragConstraints={{ left: -280, right: 0 }}
+        dragElastic={0.05}
+        onDragEnd={(e, { offset, velocity }) => {
+          if (offset.x < -100 || velocity.x < -500) {
+            onClose();
+          }
+        }}
+        transition={{ duration: TIMING.MEDIUM, ease: EASING.CINEMATIC }}
         className={`fixed left-0 top-0 h-full w-[280px] glass-sidebar flex flex-col py-8 px-6 gap-y-4 z-50
-          transition-transform duration-300 lg:translate-x-0
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          dark:bg-[#05070a]/95 dark:border-r dark:border-white/5`}
+          lg:translate-x-0 dark:bg-[#030712]/95 dark:border-r dark:border-white/5 shadow-2xl`}
         aria-label="Main Navigation Sidebar"
       >
         {/* Brand */}
         <div className="mb-8 px-2 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
-            <span className="material-symbols-outlined text-primary">cloud</span>
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+            <span className="material-symbols-outlined text-primary text-2xl">cloud</span>
           </div>
           <div>
             <h1 className="text-xl font-bold text-on-surface tracking-tight">
               Clima-Cast
             </h1>
-            <p className="text-[10px] font-bold text-primary/70 tracking-widest uppercase">
+            <p className="text-[10px] font-bold text-primary/70 tracking-[0.2em] uppercase">
               Intelligence Hub
             </p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar" aria-label="Primary Navigation">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto no-scrollbar" aria-label="Primary Navigation">
           {navItems.map(({ to, icon, label }) => (
             <NavLink
               key={to}
@@ -75,9 +92,9 @@ export default function Sidebar({ isOpen, onClose }) {
               onClick={onClose}
               aria-label={`Navigate to ${label}`}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group
+                `flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group
                 ${isActive
-                   ? 'bg-primary/15 text-primary font-bold shadow-[0_0_20px_rgba(192,132,252,0.1)] border border-primary/20'
+                   ? 'bg-primary/10 text-primary font-bold border border-primary/20 shadow-inner shadow-primary/10'
                    : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
                 }`
               }
@@ -89,7 +106,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     aria-hidden="true"
                     style={
                       isActive
-                         ? { fontVariationSettings: "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24" }
+                         ? { fontVariationSettings: "'FILL' 1, 'wght' 600" }
                          : undefined
                     }
                   >
@@ -97,7 +114,10 @@ export default function Sidebar({ isOpen, onClose }) {
                   </span>
                   <span className="text-sm tracking-wide">{label}</span>
                   {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(192,132,252,0.8)]" />
+                    <motion.div 
+                      layoutId="sidebar-active-indicator"
+                      className="ml-auto w-1 h-4 rounded-full bg-primary shadow-[0_0_12px_rgba(192,132,252,0.8)]" 
+                    />
                   )}
                 </>
               )}
@@ -106,13 +126,13 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="mt-auto border-t border-white/5 pt-6 space-y-2">
+        <div className="mt-auto border-t border-white/5 pt-6 space-y-1">
           {bottomItems.map(({ icon, label, action }) => (
             <button
               key={action}
               onClick={() => handleAction(action)}
               aria-label={label}
-              className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group
+              className={`w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group
                 ${action === 'logout'
                    ? 'text-on-surface-variant hover:bg-error/10 hover:text-error'
                    : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
@@ -123,7 +143,10 @@ export default function Sidebar({ isOpen, onClose }) {
             </button>
           ))}
         </div>
-      </aside>
+      </motion.aside>
+    </>
+  );
+}
 
     </>
   );

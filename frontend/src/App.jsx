@@ -1,5 +1,6 @@
-import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TRANSITIONS } from './utils/motion';
 
 import PublicLayout from './components/layout/PublicLayout';
 import AuthLayout from './components/layout/AuthLayout';
@@ -45,51 +46,58 @@ const PageLoader = () => (
   </div>
 );
 
-import { WeatherProvider } from './context/WeatherContext';
+const PageTransition = ({ children }) => (
+  <motion.div {...TRANSITIONS.ROUTE} className="flex-1 flex flex-col min-h-0">
+    {children}
+  </motion.div>
+);
 
 function AppContent() {
   useTheme(); // Applies theme classes to body
+  const location = useLocation();
 
   return (
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-          </Route>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            {/* Public Routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+              <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+            </Route>
 
           {/* Auth Routes */}
           <Route element={<PublicRoute />}>
             <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+              <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
             </Route>
           </Route>
 
           {/* Dashboard Routes */}
           <Route element={<PrivateRoute />}>
             <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/forecast" element={<Forecast />} />
-              <Route path="/predictions" element={<AIPredictions />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/map" element={<InteractiveMap />} />
-              <Route path="/saved-cities" element={<SavedCities />} />
-              <Route path="/alerts" element={<Alerts />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+              <Route path="/forecast" element={<PageTransition><Forecast /></PageTransition>} />
+              <Route path="/predictions" element={<PageTransition><AIPredictions /></PageTransition>} />
+              <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
+              <Route path="/map" element={<PageTransition><InteractiveMap /></PageTransition>} />
+              <Route path="/saved-cities" element={<PageTransition><SavedCities /></PageTransition>} />
+              <Route path="/alerts" element={<PageTransition><Alerts /></PageTransition>} />
+              <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+              <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
             </Route>
           </Route>
 
           {/* 404 Route */}
-          <Route path="/404" element={<NotFound />} />
+          <Route path="/404" element={<PageTransition><NotFound /></PageTransition>} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
-      </Suspense>
-    </ErrorBoundary>
-  );
+      </AnimatePresence>
+    </Suspense>
+  </ErrorBoundary>
+);
 }
 
 function App() {

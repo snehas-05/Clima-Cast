@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import api from '../services/api';
 import TopBar from '../components/layout/TopBar';
 import MetricCard from '../components/cards/MetricCard';
@@ -9,10 +9,23 @@ import PastFutureTimeline from '../components/charts/PastFutureTimeline';
 import CityComparison from '../components/analytics/CityComparison';
 import SeasonalInsights from '../components/analytics/SeasonalInsights';
 import { motion } from 'framer-motion';
+import AnimatedCard from '../components/ui/AnimatedCard';
+import { TRANSITIONS, TIMING, EASING } from '../utils/motion';
+import { useWeatherContext } from '../context/WeatherContext';
+import { usePreferences } from '../context/PreferencesContext';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+
+const containerVariants = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function Analytics() {
-  const [selectedCity, setSelectedCity] = useState('Mumbai');
-  const [supportedCities, setSupportedCities] = useState([]);
+  const { activeCity } = useWeatherContext();
+  const { unit } = usePreferences();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     history: [],
@@ -21,14 +34,8 @@ export default function Analytics() {
     pastFuture: []
   });
 
-  useEffect(() => {
-    // Fetch supported cities
-    api.get('/weather/supported-cities')
-      .then(res => setSupportedCities(res.data.cities || []))
-      .catch(err => console.error('Error fetching supported cities:', err));
-  }, []);
-
-  const fetchAnalyticsData = async (city) => {
+  const fetchAnalyticsData = useCallback(async (city) => {
+    if (!city) return;
     setLoading(true);
     try {
       const [history, trends, seasonal, pastFuture] = await Promise.all([
@@ -49,15 +56,15 @@ export default function Analytics() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchAnalyticsData(selectedCity);
-  }, [selectedCity]);
+    fetchAnalyticsData(activeCity);
+  }, [activeCity, fetchAnalyticsData]);
 
   // Compute metrics based on data
   const metrics = useMemo(() => {
-    if (!data.history.length) return [
+    if (!data.history || !data.history.length) return [
       { icon: 'device_thermostat', label: 'MEAN TEMP', value: '--', trend: '0%', trendDirection: 'neutral' },
       { icon: 'water_drop', label: 'AVG HUMIDITY', value: '--', trend: '0%', trendDirection: 'neutral' },
       { icon: 'umbrella', label: 'ANNUAL PRECIP', value: '--', trend: '0%', trendDirection: 'neutral' },
@@ -67,7 +74,7 @@ export default function Analytics() {
     const latest = data.history[data.history.length - 1];
     const prev = data.history[data.history.length - 2] || latest;
     
-    const tempTrend = ((latest.avg_temp - prev.avg_temp) / prev.avg_temp * 100).toFixed(1);
+    const tempTrend = prev.avg_temp !== 0 ? ((latest.avg_temp - prev.avg_temp) / prev.avg_temp * 100).toFixed(1) : 0;
     
     return [
       { 
@@ -83,8 +90,8 @@ export default function Analytics() {
         value: `${latest.avg_humidity.toFixed(0)}%`, 
         trend: 'Stable', 
         trendDirection: 'neutral',
-        iconBg: 'bg-cyan-100',
-        iconColor: 'text-cyan-600'
+        iconBg: 'bg-cyan-100/10',
+        iconColor: 'text-cyan-400'
       },
       { 
         icon: 'umbrella', 
@@ -92,8 +99,8 @@ export default function Analytics() {
         value: data.history.length.toString(), 
         trend: 'Years', 
         trendDirection: 'up',
-        iconBg: 'bg-indigo-100',
-        iconColor: 'text-indigo-600'
+        iconBg: 'bg-indigo-100/10',
+        iconColor: 'text-indigo-400'
       },
       { 
         icon: 'verified', 
@@ -101,35 +108,46 @@ export default function Analytics() {
         value: 'YES', 
         trend: 'Prophet', 
         trendDirection: 'up',
-        iconBg: 'bg-amber-100',
-        iconColor: 'text-amber-600'
+        iconBg: 'bg-amber-100/10',
+        iconColor: 'text-amber-400'
       },
     ];
   }, [data.history]);
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-background">
-      <TopBar title="Climate Intelligence" subtitle="Advanced Analytics & ML Forecasting" />
+      <TopBar title="Climate Intelligence" subtitle={`Grounding analysis for ${activeCity}`} />
       
-      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-8">
+      <motion.div 
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+        className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-8"
+      >
         
-        {/* Global City Selector */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 glass-card p-6 rounded-[2rem] border border-white/10 shadow-xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative z-10">
-                <h2 className="text-2xl font-black text-on-surface tracking-tight">Regional Analytics</h2>
-                <p className="text-sm text-on-surface-variant/60 font-medium tracking-wide">Historical trends & predictive modeling</p>
+        {/* Intelligence Context Header */}
+        <AnimatedCard 
+          className="p-8 border-white/5 bg-gradient-to-br from-primary/10 via-transparent to-transparent"
+          noHover
+          delay={0.1}
+        >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
+              <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Intelligence Context</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                  <h2 className="text-4xl font-black text-on-surface tracking-tighter">
+                    {activeCity} <span className="text-on-surface-variant/40 font-light">Regional Model</span>
+                  </h2>
+                  <p className="text-sm text-on-surface-variant/60 font-medium tracking-wide mt-2">Correlating historical patterns with short-term trajectories.</p>
+              </div>
+              <div className="px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hidden md:block">
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Active Grounding</p>
+                  <p className="text-xs font-medium text-primary">Synchronized with Dashboard</p>
+              </div>
             </div>
-            <select 
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full sm:w-72 px-6 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/40 font-bold text-on-surface cursor-pointer hover:bg-white/10 transition-all appearance-none relative z-10"
-            >
-                {supportedCities.map(city => (
-                    <option key={city} value={city}>{city}</option>
-                ))}
-            </select>
-        </div>
+        </AnimatedCard>
 
         {/* Metrics Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -141,7 +159,7 @@ export default function Analytics() {
               <MetricCard loading={true} />
             </>
           ) : (
-            metrics.map((m) => <MetricCard key={m.label} {...m} loading={loading} />)
+            metrics.map((m, idx) => <MetricCard key={m.label} {...m} loading={loading} delay={0.2 + idx * 0.05} />)
           )}
         </div>
 
@@ -199,7 +217,7 @@ export default function Analytics() {
             <CityComparison />
         </section>
 
-      </div>
+      </motion.div>
     </div>
   );
 }

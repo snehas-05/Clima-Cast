@@ -10,6 +10,17 @@ import LoadingSkeleton, { CardSkeleton } from '../components/ui/LoadingSkeleton'
 import { usePreferences } from '../context/PreferencesContext';
 import { formatTemp } from '../utils/temperature';
 import { useInsights } from '../hooks/useInsights';
+import { motion } from 'framer-motion';
+import AnimatedCard from '../components/ui/AnimatedCard';
+import { TRANSITIONS, TIMING, EASING } from '../utils/motion';
+
+const containerVariants = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function Dashboard() {
   const { unit } = usePreferences();
@@ -30,33 +41,53 @@ export default function Dashboard() {
   const [airQuality, setAirQuality] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Fetch weather when city or coords change
-  useEffect(() => {
+  // Unified Orchestration Effect
+  const fetchDashboardData = useCallback(async () => {
+    let result;
     if (coordinates) {
-      fetchWeather({ lat: coordinates.lat, lon: coordinates.lon });
+      result = await fetchWeather({ lat: coordinates.lat, lon: coordinates.lon });
     } else if (activeCity) {
-      fetchWeather({ city: activeCity });
+      result = await fetchWeather({ city: activeCity });
     }
-  }, [activeCity, coordinates, fetchWeather]);
 
-  // Fetch related data when weather data is loaded
-  useEffect(() => {
-    if (weatherData?.city) {
-      fetchForecast(weatherData.city, false);
-      fetchAirQuality(weatherData.city).then(res => {
-        if (res.success) {
-          setAirQuality(res.data);
-        }
+    if (result?.city) {
+      // Trigger secondary fetches in parallel
+      Promise.all([
+        fetchForecast(result.city, false),
+        fetchAirQuality(result.city)
+      ]).then(([forecastRes, aqiRes]) => {
+        if (aqiRes.success) setAirQuality(aqiRes.data);
       });
     }
-  }, [weatherData?.city, fetchForecast, fetchAirQuality]);
+  }, [activeCity, coordinates, fetchWeather, fetchForecast, fetchAirQuality]);
 
-  if (geoLoading || (weatherLoading && !weatherData)) {
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const metrics = useMemo(() => {
+    if (!weatherData) return [];
+    
+    return [
+      { id: 'temp', icon: 'device_thermostat', label: 'TEMPERATURE', value: `${formatTemp(weatherData.temperature, unit)}°`, subLabel: `Feels like ${formatTemp(weatherData.feels_like, unit)}°`, trend: 'Live' },
+      { id: 'humidity', icon: 'water_drop', label: 'HUMIDITY', value: `${weatherData.humidity}%`, subLabel: weatherData.humidity > 60 ? 'Sticky' : weatherData.humidity < 30 ? 'Dry' : 'Comfortable', trend: 'Normal', iconBg: 'bg-blue-500/10', iconColor: 'text-blue-400' },
+      { id: 'wind', icon: 'air', label: 'WIND SPEED', value: `${weatherData.wind_kph} km/h`, subLabel: 'Gentle breeze', trend: 'Stable', iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-400' },
+      { id: 'pressure', icon: 'compress', label: 'PRESSURE', value: `${weatherData.pressure_mb} mb`, subLabel: 'Steady', trend: 'Stable', iconBg: 'bg-amber-500/10', iconColor: 'text-amber-400' },
+      { id: 'aqi', icon: 'eco', label: 'AIR QUALITY (AQI)', value: airQuality?.aqi || '4', subLabel: (airQuality?.aqi || 4) <= 50 ? 'Good' : 'Moderate', trend: 'Live', iconBg: 'bg-cyan-500/10', iconColor: 'text-cyan-400' },
+    ];
+  }, [weatherData, airQuality, unit]);
+
+  const isLoading = geoLoading || (weatherLoading && !weatherData);
+
+  if (isLoading) {
     return (
-      <div className="flex-1 p-8 space-y-8 animate-fade-in">
+      <div className="flex-1 p-8 space-y-8 animate-fade-in bg-background min-h-screen">
         <div className="flex justify-between items-center mb-8">
           <LoadingSkeleton height="3rem" width="250px" />
-          <LoadingSkeleton height="2.5rem" width="120px" borderRadius="1.25rem" />
+          <div className="flex gap-4">
+            <LoadingSkeleton height="2.5rem" width="100px" borderRadius="1.25rem" />
+            <LoadingSkeleton height="2.5rem" width="100px" borderRadius="1.25rem" />
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           <CardSkeleton />
@@ -67,23 +98,15 @@ export default function Dashboard() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <LoadingSkeleton height="400px" borderRadius="2rem" />
+            <LoadingSkeleton height="500px" borderRadius="2rem" />
           </div>
           <div className="lg:col-span-4">
-            <LoadingSkeleton height="400px" borderRadius="2rem" />
+            <LoadingSkeleton height="500px" borderRadius="2rem" />
           </div>
         </div>
       </div>
     );
   }
-
-  const metrics = weatherData ? [
-    { id: 'temp', icon: 'device_thermostat', label: 'TEMPERATURE', value: `${formatTemp(weatherData.temperature, unit)}°`, subLabel: `Feels like ${formatTemp(weatherData.feels_like, unit)}°`, trend: 'Live' },
-    { id: 'humidity', icon: 'water_drop', label: 'HUMIDITY', value: `${weatherData.humidity}%`, subLabel: weatherData.humidity > 60 ? 'Sticky' : weatherData.humidity < 30 ? 'Dry' : 'Comfortable', trend: 'Normal', iconBg: 'bg-blue-500/10', iconColor: 'text-blue-400' },
-    { id: 'wind', icon: 'air', label: 'WIND SPEED', value: `${weatherData.wind_kph} km/h`, subLabel: 'Gentle breeze', trend: 'Stable', iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-400' },
-    { id: 'pressure', icon: 'compress', label: 'PRESSURE', value: `${weatherData.pressure_mb} mb`, subLabel: 'Steady', trend: 'Stable', iconBg: 'bg-amber-500/10', iconColor: 'text-amber-400' },
-    { id: 'aqi', icon: 'eco', label: 'AIR QUALITY (AQI)', value: airQuality?.aqi || '4', subLabel: (airQuality?.aqi || 4) <= 50 ? 'Good' : 'Moderate', trend: 'Live', iconBg: 'bg-cyan-500/10', iconColor: 'text-cyan-400' },
-  ] : [];
 
 
 
@@ -374,7 +397,12 @@ export default function Dashboard() {
     <>
       <TopBar title="Dashboard" subtitle={weatherData?.city || "Real-Time Overview"} />
       
-      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]">
+      <motion.div 
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+        className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]"
+      >
         
         {staleCache && (
           <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 px-6 py-4 rounded-[1.5rem] flex items-center gap-4 shadow-lg shadow-amber-950/20 backdrop-blur-md">
@@ -407,19 +435,21 @@ export default function Dashboard() {
 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[var(--spacing-card-gap)]">
-          {metrics.map((m) => (
+          {metrics.map((m, idx) => (
             <MetricCard 
               key={m.label} 
               {...m} 
+              delay={idx * 0.05}
               onClick={() => setSelectedCard({ ...m, id: m.id })}
             />
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--spacing-card-gap)]">
-          <div 
-            className={`lg:col-span-8 glass-card rounded-[2rem] p-10 flex flex-col relative overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-2xl group border-white/5`}
+          <AnimatedCard 
+            className="lg:col-span-8 p-10 flex flex-col group border-white/5"
             onClick={() => setSelectedCard({ id: 'current-conditions', title: 'Current Conditions' })}
+            delay={0.3}
           >
             <div className={`absolute top-0 right-0 w-96 h-96 bg-gradient-to-br ${weatherData?.gradient || 'from-primary/20 to-transparent'} blur-[100px] opacity-20 -mr-32 -mt-32 transition-all duration-700 group-hover:scale-150 group-hover:opacity-40`} />
             
@@ -458,7 +488,7 @@ export default function Dashboard() {
             </div>
 
 
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 relative z-10">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 relative z-10 snap-x snap-mandatory">
               {forecastLoading ? (
                 [1, 2, 3, 4, 5, 6, 7].map((i) => (
                   <div key={i} className="min-w-[96px] h-32 bg-slate-800/40 rounded-2xl animate-pulse" />
@@ -480,9 +510,13 @@ export default function Dashboard() {
               View Detailed Breakdown
               <span className="material-symbols-outlined">arrow_forward</span>
             </div>
-          </div>
+          </AnimatedCard>
 
-          <div className="lg:col-span-4 glass-card rounded-[2rem] p-8 flex flex-col border-white/5">
+          <AnimatedCard 
+            className="lg:col-span-4 p-8 flex flex-col border-white/5"
+            noHover
+            delay={0.4}
+          >
             <h4 className="text-xl font-bold text-on-surface mb-8 flex items-center gap-3">
               <span className="material-symbols-outlined text-primary p-2 bg-primary/10 rounded-xl">auto_awesome</span>
               AI Quick Insights
@@ -513,12 +547,13 @@ export default function Dashboard() {
               View Full Insights
               <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </button>
-          </div>
+          </AnimatedCard>
 
 
-          <div 
-            className="lg:col-span-12 glass-card rounded-[2.5rem] p-10 cursor-pointer group transition-all duration-500 hover:shadow-2xl border-white/5 relative overflow-hidden"
+          <AnimatedCard 
+            className="lg:col-span-12 p-10 group border-white/5"
             onClick={() => setSelectedCard({ id: 'forecast', title: '5-Day Forecast' })}
+            delay={0.5}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
@@ -558,10 +593,10 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </div>
+          </AnimatedCard>
 
         </div>
-      </div>
+      </motion.div>
 
       <Modal 
         isOpen={!!selectedCard} 

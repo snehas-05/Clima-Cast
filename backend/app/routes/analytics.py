@@ -212,53 +212,113 @@ async def trends(city: str = Query(...)):
 
 @lru_cache(maxsize=64)
 def get_past_future_data(city: str):
-    if df_global.empty:
-        return []
+    if df_global is None or df_global.empty:
+        return {"timeline": [], "markers": [], "interpretation": "Data unavailable"}
     
     city_df = df_global[df_global['location_name'].str.lower() == city.lower()].copy()
     if city_df.empty:
-        return []
+        return {"timeline": [], "markers": [], "interpretation": "City not found in historical records"}
     
-    # Historical: last 30 entries (assuming entries are daily or sequential enough)
-    # Actually, let's get the last 30 days of available data
+    # 1. Historical: last 30 days
     last_date = city_df['date'].max()
     historical_df = city_df[city_df['date'] > (last_date - timedelta(days=30))].sort_values('date')
     
-    combined_data = []
+    timeline = []
     for _, row in historical_df.iterrows():
-        combined_data.append({
+        timeline.append({
             "date": row['date'].strftime('%Y-%m-%d'),
             "temperature": safe_float(row['temperature_celsius']),
             "humidity": safe_float(row['humidity']),
+            "precip": safe_float(row.get('precip_mm', 0)),
             "type": "historical"
         })
     
-    # Prophet Prediction
+    # 2. Prophet Prediction (Next 7 Days)
+    markers = []
+    interpretation = "Stable conditions"
+    
     try:
-        prophet_df = city_df[['date', 'temperature_celsius']].rename(columns={'date': 'ds', 'temperature_celsius': 'y'})
+        # We need more data for Prophet to be accurate, but keep it lightweight
+        prophet_input = city_df[['date', 'temperature_celsius']].rename(columns={'date': 'ds', 'temperature_celsius': 'y'})
+        # Limit input to last 2 years for speed if necessary, but here we use the whole city history
+        
         model = Prophet(yearly_seasonality=True, daily_seasonality=False, weekly_seasonality=False)
-        model.fit(prophet_df)
+        model.fit(prophet_input)
         
         future = model.make_future_dataframe(periods=7)
         forecast = model.predict(future)
         
-        # Get next 7 days
         next_7 = forecast.tail(7)
         
         for _, row in next_7.iterrows():
-            combined_data.append({
+            timeline.append({
                 "date": row['ds'].strftime('%Y-%m-%d'),
                 "temperature": safe_float(row['yhat']),
-                "humidity": None, # Prophet only predicted temp here for simplicity, or we could fit another
+                "humidity": None, 
+                "precip": None,
                 "temp_lower": safe_float(row['yhat_lower']),
                 "temp_upper": safe_float(row['yhat_upper']),
                 "type": "predicted"
             })
-    except Exception as e:
-        logger.error(f"Prophet prediction failed for {city}: {e}")
-        # Fallback or just return historical
+            
+        # 3. Trend Interpretation
+        # Calculate slope of yhat over the 7 days
+        yhat_values = next_7['yhat'].values
+        slope = (yhat_values[-1] - yhat_values[0]) / 7
         
-    return combined_data
+        if slope > 0.5:
+            interpretation = "Warming trend expected over the next week"
+        elif slope < -0.5:
+            interpretation = "Cooling pattern approaching"
+        elif abs(slope) < 0.2:
+            interpretation = "Climate conditions stabilizing"
+        else:
+            interpretation = "Mild temperature fluctuations expected"
+            
+    except Exception as e:
+        logger.error(f"Prophet failure for {city}: {e}")
+        interpretation = "Unable to generate future insights"
+
+    # 4. Memory Marker Detection (Deterministic)
+    if not historical_df.empty:
+        # Hottest
+        hottest_idx = historical_df['temperature_celsius'].idxmax()
+        hottest_row = historical_df.loc[hottest_idx]
+        markers.append({
+            "date": hottest_row['date'].strftime('%Y-%m-%d'),
+            "label": "Warmest day",
+            "value": f"{safe_float(hottest_row['temperature_celsius'])}°C",
+            "type": "hot"
+        })
+        
+        # Coldest
+        coldest_idx = historical_df['temperature_celsius'].idxmin()
+        coldest_row = historical_df.loc[coldest_idx]
+        if hottest_idx != coldest_idx: # Avoid overlap
+            markers.append({
+                "date": coldest_row['date'].strftime('%Y-%m-%d'),
+                "label": "Coolest day",
+                "value": f"{safe_float(coldest_row['temperature_celsius'])}°C",
+                "type": "cold"
+            })
+            
+        # Unusual Rain (if any > 5mm)
+        rainy_days = historical_df[historical_df['precip_mm'] > 5]
+        if not rainy_days.empty:
+            max_rain_row = rainy_days.loc[rainy_days['precip_mm'].idxmax()]
+            markers.append({
+                "date": max_rain_row['date'].strftime('%Y-%m-%d'),
+                "label": "Heavy rainfall",
+                "value": f"{safe_float(max_rain_row['precip_mm'])}mm",
+                "type": "rain"
+            })
+
+    # Limit to top markers for cinematic clarity
+    return {
+        "timeline": timeline,
+        "markers": markers[:4],
+        "interpretation": interpretation
+    }
 
 @router.get("/past-future")
 async def past_future(city: str = Query(...)):
