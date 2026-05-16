@@ -170,6 +170,11 @@ venv\Scripts\activate
 source venv/bin/activate
 
 pip install -r requirements.txt
+
+# Initialize environment variables
+# Linux/Mac: cp .env.example .env
+# Windows: copy .env.example .env
+
 uvicorn app.main:app --reload
 ```
 
@@ -177,6 +182,11 @@ uvicorn app.main:app --reload
 ```bash
 cd frontend
 npm install
+
+# Initialize environment variables
+# Linux/Mac: cp .env.example .env
+# Windows: copy .env.example .env
+
 npm run dev
 ```
 
