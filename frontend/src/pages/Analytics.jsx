@@ -108,21 +108,22 @@ export default function Analytics() {
   }, [data.history]);
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex-1 flex flex-col min-h-screen bg-background">
       <TopBar title="Climate Intelligence" subtitle="Advanced Analytics & ML Forecasting" />
       
       <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-8">
         
         {/* Global City Selector */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/60 backdrop-blur-md p-4 rounded-3xl border border-white/40 shadow-sm">
-            <div>
-                <h2 className="text-xl font-bold text-on-surface">Regional Analytics</h2>
-                <p className="text-sm text-on-surface-variant/60">Select a city to explore historical trends and future predictions</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 glass-card p-6 rounded-[2rem] border border-white/10 shadow-xl relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+                <h2 className="text-2xl font-black text-on-surface tracking-tight">Regional Analytics</h2>
+                <p className="text-sm text-on-surface-variant/60 font-medium tracking-wide">Historical trends & predictive modeling</p>
             </div>
             <select 
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full sm:w-64 px-4 py-2.5 bg-white border border-outline-variant/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-semibold text-on-surface cursor-pointer"
+                className="w-full sm:w-72 px-6 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/40 font-bold text-on-surface cursor-pointer hover:bg-white/10 transition-all appearance-none relative z-10"
             >
                 {supportedCities.map(city => (
                     <option key={city} value={city}>{city}</option>

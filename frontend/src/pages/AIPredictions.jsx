@@ -16,7 +16,7 @@ const heroStats = [
 ];
 
 const PredictionCard = ({ title, icon, value, subValue, explanation, loading, trend, colorClass = "text-primary" }) => (
-  <div className="bg-surface-container-low rounded-2xl p-6 border border-white/50 space-y-4">
+  <div className="glass-card rounded-[1.5rem] p-7 border border-white/10 space-y-5 hover:border-primary/40 transition-all duration-300">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-xl bg-opacity-10 ${colorClass.replace('text-', 'bg-')}`}>
@@ -216,11 +216,11 @@ export default function AIPredictions() {
                 Atmospheric intelligence is not yet available for <span className="text-primary font-bold">{city}</span>. Our models are currently training on this region's micro-climate. In the meantime, we are providing a high-precision 5-day forecast from our global sensor network.
               </p>
               <div className="flex gap-4 pt-2">
-                <div className="px-4 py-2 bg-surface-container-low rounded-full border border-white/50 text-label-caps text-on-surface-variant flex items-center gap-2">
+                <div className="px-5 py-2.5 bg-white/5 rounded-full border border-white/10 text-[10px] font-black text-on-surface-variant flex items-center gap-2 tracking-widest uppercase">
                   <span className="material-symbols-outlined text-sm">history</span>
                   HISTORICAL DATA: ACTIVE
                 </div>
-                <div className="px-4 py-2 bg-surface-container-low rounded-full border border-white/50 text-label-caps text-on-surface-variant flex items-center gap-2">
+                <div className="px-5 py-2.5 bg-white/5 rounded-full border border-white/10 text-[10px] font-black text-on-surface-variant flex items-center gap-2 tracking-widest uppercase">
                   <span className="material-symbols-outlined text-sm">sensors</span>
                   API FORECAST: VERIFIED
                 </div>
@@ -261,15 +261,15 @@ export default function AIPredictions() {
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="px-4 py-2 bg-surface-container-low rounded-full border border-white/50 text-label-caps text-on-surface-variant">
-                  VERSION: {predictions.metrics?.rain_model_version || 'v1.0'}
+                <div className="px-5 py-2.5 bg-white/5 rounded-full border border-white/10 text-[10px] font-black text-on-surface-variant tracking-widest">
+                  VERSION: {predictions.metrics?.rain_model_version || 'v3.2'}
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="bg-surface-container-low rounded-2xl p-6 border border-white/50">
-                <p className="text-label-caps text-on-surface-variant mb-2">MODEL CONFIDENCE</p>
+              <div className="bg-white/5 rounded-[1.5rem] p-6 border border-white/10 hover:border-primary/30 transition-all group">
+                <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-widest mb-2">MODEL CONFIDENCE</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-h2-dashboard text-primary">
                     <CountUp value={confidenceValue} />%
@@ -277,13 +277,13 @@ export default function AIPredictions() {
                 </div>
                 <p className="text-sm text-on-surface-variant mt-1">Weighted accuracy mesh</p>
               </div>
-              <div className="bg-surface-container-low rounded-2xl p-6 border border-white/50">
-                <p className="text-label-caps text-on-surface-variant mb-2">DATA POINTS</p>
+              <div className="bg-white/5 rounded-[1.5rem] p-6 border border-white/10 hover:border-primary/30 transition-all group">
+                <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-widest mb-2">DATA POINTS</p>
                 <p className="text-h2-dashboard text-primary">4.2PB</p>
                 <p className="text-sm text-on-surface-variant mt-1">Processed history & real-time</p>
               </div>
-              <div className="bg-surface-container-low rounded-2xl p-6 border border-white/50">
-                <p className="text-label-caps text-on-surface-variant mb-2">LATENCY</p>
+              <div className="bg-white/5 rounded-[1.5rem] p-6 border border-white/10 hover:border-primary/30 transition-all group">
+                <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-widest mb-2">LATENCY</p>
                 <p className="text-h2-dashboard text-primary">124ms</p>
                 <p className="text-sm text-on-surface-variant mt-1">Edge inference speed</p>
               </div>
@@ -405,7 +405,7 @@ function CountUp({ value }) {
 
 function MetricItem({ label, value, icon }) {
   return (
-    <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl border border-white/50">
+    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/10 hover:border-primary/20 transition-all">
       <div className="flex items-center gap-3">
         <span className="material-symbols-outlined text-primary text-xl">{icon}</span>
         <span className="text-body-main text-on-surface">{label}</span>
@@ -440,14 +440,14 @@ function TrendChart({ data }) {
       <div className="flex-1 min-h-0">
         <svg className="w-full h-full" viewBox="0 0 800 220" preserveAspectRatio="none">
           {/* Confidence Area */}
-          <path d={areaPath} fill="rgba(207, 188, 255, 0.2)" stroke="none" />
+          <path d={areaPath} fill="rgba(192, 132, 252, 0.1)" stroke="none" />
           
           {/* Prediction Line */}
-          <path d={linePath} fill="none" stroke="#4f378a" strokeWidth="3" strokeLinecap="round" />
+          <path d={linePath} fill="none" stroke="var(--color-primary)" strokeWidth="3" strokeLinecap="round" />
           
           {/* Dots */}
           {chartData.map((d, i) => (
-            <circle key={i} cx={getX(i)} cy={getY(d.yhat)} r="4" fill="#4f378a" className="transition-all hover:r-6 cursor-pointer" />
+            <circle key={i} cx={getX(i)} cy={getY(d.yhat)} r="4" fill="var(--color-primary)" className="transition-all hover:r-6 cursor-pointer" />
           ))}
         </svg>
       </div>

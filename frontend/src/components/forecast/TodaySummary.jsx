@@ -20,47 +20,52 @@ const TodaySummary = ({ city, today }) => {
   const gradientClass = conditionGradients[today.condition?.toLowerCase()] || conditionGradients.clear;
 
   return (
-    <div className={`glass-card rounded-3xl p-8 relative overflow-hidden transition-all duration-300 bg-gradient-to-br ${gradientClass}`}>
-      <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-        <WeatherIcon condition={today.condition} className="w-64 h-64" />
+    <div className={`glass-card rounded-[2.5rem] p-10 relative overflow-hidden transition-all duration-500 bg-gradient-to-br ${gradientClass} border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] group`}>
+      <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+        <WeatherIcon condition={today.condition} className="w-80 h-80" />
       </div>
 
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="material-symbols-outlined text-primary">location_on</span>
-          <span className="text-label-caps text-primary tracking-[0.2em]">{city?.toUpperCase()}</span>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-primary/20 rounded-lg">
+            <span className="material-symbols-outlined text-primary text-xl">location_on</span>
+          </div>
+          <span className="text-label-caps text-primary tracking-[0.3em] font-bold">{city?.toUpperCase()}</span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
-          <h2 className="text-[84px] font-bold text-on-surface tracking-tighter leading-none">
+        <div className="flex flex-col md:flex-row md:items-end gap-8 mb-10">
+          <h2 className="text-[100px] font-black text-on-surface tracking-tighter leading-none bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
             {formatTemp(today.high, unit)}°
           </h2>
-          <div className="pb-3">
-            <p className="text-2xl font-medium text-on-surface-variant mb-1">{today.condition || '--'}</p>
-            <p className="text-on-surface-variant/80 font-medium">{today.description || '--'}</p>
+          <div className="pb-4">
+            <p className="text-3xl font-bold text-on-surface mb-2">{today.condition || '--'}</p>
+            <p className="text-on-surface-variant/80 font-medium text-lg italic">"{today.description || '--'}"</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/5 pt-8">
-          <div className="space-y-1">
-            <p className="text-label-caps text-on-surface-variant/60">High / Low</p>
-            <p className="text-lg font-bold text-on-surface">{formatTemp(today.high, unit)}° / {formatTemp(today.low, unit)}°</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 border-t border-white/5 pt-10">
+          <div className="space-y-2">
+            <p className="text-[10px] text-label-caps text-on-surface-variant/40 font-black tracking-widest">HIGH / LOW</p>
+            <p className="text-xl font-bold text-on-surface flex items-baseline gap-1">
+              {formatTemp(today.high, unit)}° <span className="text-sm font-medium text-on-surface-variant/40">/ {formatTemp(today.low, unit)}°</span>
+            </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-label-caps text-on-surface-variant/60">Feels Like</p>
-            <p className="text-lg font-bold text-on-surface">{formatTemp(today.feels_like, unit)}°</p>
+          <div className="space-y-2">
+            <p className="text-[10px] text-label-caps text-on-surface-variant/40 font-black tracking-widest">FEELS LIKE</p>
+            <p className="text-xl font-bold text-primary">{formatTemp(today.feels_like, unit)}°</p>
           </div>
-          <div className="space-y-1">
-            <p className="text-label-caps text-on-surface-variant/60">Sunrise</p>
-            <p className="text-lg font-bold text-on-surface">{today.sunrise || '--'}</p>
+          <div className="space-y-2">
+            <p className="text-[10px] text-label-caps text-on-surface-variant/40 font-black tracking-widest">SUNRISE</p>
+            <p className="text-xl font-bold text-on-surface">{today.sunrise || '--'}</p>
           </div>
-          <div className="space-y-1">
-            <p className="text-label-caps text-on-surface-variant/60">Sunset</p>
-            <p className="text-lg font-bold text-on-surface">{today.sunset || '--'}</p>
+          <div className="space-y-2">
+            <p className="text-[10px] text-label-caps text-on-surface-variant/40 font-black tracking-widest">SUNSET</p>
+            <p className="text-xl font-bold text-on-surface">{today.sunset || '--'}</p>
           </div>
         </div>
       </div>
     </div>
+
   );
 };
 

@@ -102,38 +102,46 @@ body {
    ============================================================ */
 
 .dark {
-  --color-background: #0f172a;
-  --color-on-background: #f8fafc;
-  --color-surface: #1e293b;
-  --color-on-surface: #f1f5f9;
-  --color-surface-dim: #0f172a;
-  --color-surface-bright: #334155;
-  --color-surface-container-lowest: #020617;
-  --color-surface-container-low: #1e293b;
-  --color-surface-container: #1e293b;
-  --color-surface-container-high: #334155;
-  --color-surface-container-highest: #475569;
-  --color-surface-variant: #475569;
+  --color-background: #030712;
+  --color-on-background: #ffffff;
+  --color-surface: #0a0c18;
+  --color-on-surface: #ffffff;
+  --color-surface-dim: #030712;
+  --color-surface-bright: #1e293b;
+  --color-surface-container-lowest: #02040a;
+  --color-surface-container-low: #0a0c18;
+  --color-surface-container: #111322;
+  --color-surface-container-high: #1e1b4b;
+  --color-surface-container-highest: #2e2a5e;
+  --color-surface-variant: #1e1b4b;
   --color-on-surface-variant: #94a3b8;
-  --color-outline: #475569;
-  --color-outline-variant: #334155;
+  --color-outline: #334155;
+  --color-outline-variant: #1e293b;
   
   --color-inverse-surface: #f8fafc;
-  --color-inverse-on-surface: #0f172a;
+  --color-inverse-on-surface: #030712;
+
+  --color-primary: #c084fc;
+  --color-primary-container: #581c87;
+  --color-on-primary-container: #f5f3ff;
 }
 
 .dark .glass-card, .dark .glass-panel, .dark .glass-sidebar, .dark .glass-topbar {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 40px 60px -15px rgba(0, 0, 0, 0.4);
+  background: rgba(17, 19, 34, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 
-.dark .mesh-gradient {
-  background-color: #0f172a;
+.dark .mesh-gradient, .dark .mesh-gradient-subtle, .dark .atmospheric-bg, .dark .atmospheric-bg-alt {
+  background-color: #030712;
   background-image:
-    radial-gradient(at 0% 0%, rgba(79, 55, 138, 0.2) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(201, 167, 77, 0.05) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
 }
+
+
 
 /* Material Symbols baseline */
 .material-symbols-outlined {

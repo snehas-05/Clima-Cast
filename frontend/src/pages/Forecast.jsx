@@ -74,17 +74,8 @@ export default function Forecast() {
   }, [forecast]);
 
   // 4. Dynamic Background Background Color based on weather
-  const getBackgroundClass = () => {
-    if (!memoizedForecast?.today) return 'bg-background';
-    const condition = memoizedForecast.today.condition?.toLowerCase();
+  const getBackgroundClass = () => 'bg-background';
 
-    if (condition.includes('sun') || condition.includes('clear')) return 'bg-amber-900/5';
-    if (condition.includes('cloud')) return 'bg-slate-900/5';
-    if (condition.includes('rain')) return 'bg-blue-900/5';
-    if (condition.includes('thunder')) return 'bg-purple-900/5';
-    if (condition.includes('snow')) return 'bg-cyan-900/5';
-    return 'bg-background';
-  };
 
   return (
     <div className={`min-h-screen transition-colors duration-1000 ${getBackgroundClass()}`}>
@@ -107,10 +98,10 @@ export default function Forecast() {
         )}
 
         {/* Divider */}
-        <div className="flex items-center gap-4 py-4">
-          <div className="h-[1px] flex-1 bg-white/5" />
-          <span className="text-label-caps text-on-surface-variant/40 tracking-[0.3em]">7-Day Forecast</span>
-          <div className="h-[1px] flex-1 bg-white/5" />
+        <div className="flex items-center gap-6 py-6">
+          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <span className="text-label-caps text-primary/60 tracking-[0.4em] font-bold">7-Day Forecast</span>
+          <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-white/10 to-transparent" />
         </div>
 
         {/* 7-Day Grid */}

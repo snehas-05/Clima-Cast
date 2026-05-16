@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import UnitToggle from '../ui/UnitToggle';
 import ThemeToggle from '../ui/ThemeToggle';
+import SearchOverlay from '../ui/SearchOverlay';
+import api from '../../services/api';
+import { useEffect, useRef } from 'react';
 
 const IconButton = ({ icon, onClick, ariaLabel }) => (
   <button 
@@ -15,19 +18,57 @@ const IconButton = ({ icon, onClick, ariaLabel }) => (
 
 export default function TopBar({ title, subtitle, children }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const searchRef = useRef(null);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      console.log(`Searching for: ${searchQuery}`);
-      // For now, we can show an alert or navigate if we had a search page
-      // But let's just log and clear for now, or simulate a search
-      alert(`Search feature: Looking up data for "${searchQuery}"...`);
-      setSearchQuery('');
+      executeSearch(searchQuery);
     }
   };
+
+  const executeSearch = async (query) => {
+    setSearchLoading(true);
+    setSearchResults(null);
+    
+    // Try to extract city from subtitle or localStorage
+    let contextCity = "Ludhiana";
+    if (subtitle && subtitle !== "Atmospheric Outlook" && subtitle !== "Real-Time Overview") {
+      contextCity = subtitle;
+    } else {
+      const lastCity = localStorage.getItem('last_searched_city');
+      if (lastCity) contextCity = lastCity;
+    }
+
+    try {
+      const response = await api.get('/search', {
+        params: { q: query, city: contextCity }
+      });
+      setSearchResults(response.data);
+    } catch (err) {
+      console.error("Search error:", err);
+      setSearchResults({
+        answer: "Sorry, I encountered an error while searching. Please try again.",
+        related_questions: ["What is the temperature?", "Show forecast"]
+      });
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchResults(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const notifications = [
     { id: 1, text: "High temperature warning in your area", time: "2h ago", icon: "warning" },
@@ -59,7 +100,7 @@ export default function TopBar({ title, subtitle, children }) {
           <ThemeToggle />
 
           {/* Search */}
-          <div className="relative group hidden xl:block">
+          <div className="relative group hidden xl:block" ref={searchRef}>
             <span className="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary" aria-hidden="true">
               <span className="material-symbols-outlined">search</span>
             </span>
@@ -68,9 +109,19 @@ export default function TopBar({ title, subtitle, children }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
-              className="bg-surface-container-low border-none rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60"
-              placeholder="Search data..."
+              className="bg-surface-container-low border-none rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60 transition-all focus:w-80"
+              placeholder="Ask anything about weather..."
               aria-label="Search weather data"
+            />
+            
+            <SearchOverlay 
+              results={searchResults} 
+              loading={searchLoading} 
+              onClose={() => setSearchResults(null)}
+              onQueryChange={(q) => {
+                setSearchQuery(q);
+                executeSearch(q);
+              }}
             />
           </div>
 

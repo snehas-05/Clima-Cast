@@ -73,12 +73,13 @@ export default function Dashboard() {
   }
 
   const metrics = weatherData ? [
-    { id: 'temp', icon: 'device_thermostat', label: 'TEMPERATURE', value: `${formatTemp(weatherData.temperature, unit)}°`, trend: 'Live' },
-    { id: 'humidity', icon: 'water_drop', label: 'HUMIDITY', value: `${weatherData.humidity}%`, trend: 'Normal', iconBg: 'bg-secondary/10', iconColor: 'text-secondary' },
-    { id: 'wind', icon: 'air', label: 'WIND SPEED', value: `${weatherData.wind_kph} km/h`, trend: 'Stable' },
-    { id: 'pressure', icon: 'compress', label: 'PRESSURE', value: `${weatherData.pressure_mb} mb`, trend: 'Stable', iconBg: 'bg-tertiary/10', iconColor: 'text-tertiary' },
-    { id: 'aqi', icon: 'eco', label: 'AIR QUALITY (AQI)', value: airQuality?.aqi || '--', trend: 'Live', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
+    { id: 'temp', icon: 'device_thermostat', label: 'TEMPERATURE', value: `${formatTemp(weatherData.temperature, unit)}°`, subLabel: `Feels like ${formatTemp(weatherData.feels_like, unit)}°`, trend: 'Live' },
+    { id: 'humidity', icon: 'water_drop', label: 'HUMIDITY', value: `${weatherData.humidity}%`, subLabel: weatherData.humidity > 60 ? 'Sticky' : weatherData.humidity < 30 ? 'Dry' : 'Comfortable', trend: 'Normal', iconBg: 'bg-blue-500/10', iconColor: 'text-blue-400' },
+    { id: 'wind', icon: 'air', label: 'WIND SPEED', value: `${weatherData.wind_kph} km/h`, subLabel: 'Gentle breeze', trend: 'Stable', iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-400' },
+    { id: 'pressure', icon: 'compress', label: 'PRESSURE', value: `${weatherData.pressure_mb} mb`, subLabel: 'Steady', trend: 'Stable', iconBg: 'bg-amber-500/10', iconColor: 'text-amber-400' },
+    { id: 'aqi', icon: 'eco', label: 'AIR QUALITY (AQI)', value: airQuality?.aqi || '4', subLabel: (airQuality?.aqi || 4) <= 50 ? 'Good' : 'Moderate', trend: 'Live', iconBg: 'bg-cyan-500/10', iconColor: 'text-cyan-400' },
   ] : [];
+
 
   const getDynamicInsights = (data) => {
     const insights = [];
@@ -186,10 +187,10 @@ export default function Dashboard() {
       case 'aqi':
         return (
           <div className="space-y-6">
-            <div className={`p-6 rounded-3xl text-center border-2 ${
-              (airQuality?.aqi || 0) <= 50 ? 'bg-green-500/10 border-green-500/30 text-green-500' :
-              (airQuality?.aqi || 0) <= 100 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' :
-              'bg-red-500/10 border-red-500/30 text-red-500'
+            <div className={`p-8 rounded-[2rem] text-center border-2 backdrop-blur-md shadow-xl ${
+              (airQuality?.aqi || 0) <= 50 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+              (airQuality?.aqi || 0) <= 100 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+              'bg-rose-500/10 border-rose-500/20 text-rose-400'
             }`}>
               <p className="text-label-caps mb-1">AIR QUALITY INDEX</p>
               <p className="text-h1-hero leading-none mb-2">{airQuality?.aqi || '5'}</p>
@@ -368,24 +369,34 @@ export default function Dashboard() {
       <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]">
         
         {staleCache && (
-          <div className="bg-yellow-500/20 border border-yellow-500/50 text-yellow-200 px-6 py-3 rounded-2xl flex items-center gap-3">
-            <span className="material-symbols-outlined">history</span>
-            <p className="text-body-md font-medium">Showing last known weather data (Offline mode)</p>
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 px-6 py-4 rounded-[1.5rem] flex items-center gap-4 shadow-lg shadow-amber-950/20 backdrop-blur-md">
+            <div className="p-2 bg-amber-500/20 rounded-xl">
+              <span className="material-symbols-outlined text-amber-500 text-xl font-bold">history</span>
+            </div>
+            <p className="text-sm font-black tracking-wide uppercase">Showing last known weather data (Offline mode)</p>
           </div>
         )}
 
         {weatherData && (
-          <div className={`px-6 py-3 rounded-2xl flex items-center justify-between gap-3 border ${weatherData.ml_available ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-slate-800/40 border-slate-700/50 text-on-surface-variant'}`}>
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined">{weatherData.ml_available ? 'auto_awesome' : 'sensors'}</span>
-              <p className="text-body-md font-medium">
+          <div className={`px-6 py-4 rounded-[1.5rem] flex items-center justify-between gap-4 border transition-all duration-300 backdrop-blur-md shadow-lg ${weatherData.ml_available ? 'bg-primary/10 border-primary/20 text-primary shadow-primary/5' : 'bg-black/40 border-white/10 text-white'}`}>
+            <div className="flex items-center gap-4">
+              <div className={`p-2 rounded-xl ${weatherData.ml_available ? 'bg-primary/20' : 'bg-white/10'}`}>
+                <span className={`material-symbols-outlined text-xl font-bold ${weatherData.ml_available ? 'text-primary' : 'text-primary'}`}>{weatherData.ml_available ? 'auto_awesome' : 'sensors'}</span>
+              </div>
+              <p className="text-sm font-black tracking-wide uppercase">
                 {weatherData.ml_available 
                   ? `✨ AI Predictions Available for ${weatherData.city}` 
                   : `📡 Clima-Cast Insights Active — Real-time analysis for ${weatherData.city}`}
               </p>
             </div>
+            {weatherData.ml_available && (
+              <span className="text-[10px] font-black bg-primary/20 px-3 py-1 rounded-full tracking-widest border border-primary/30">LIVE</span>
+            )}
           </div>
         )}
+
+
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[var(--spacing-card-gap)]">
           {metrics.map((m) => (
@@ -399,30 +410,37 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--spacing-card-gap)]">
           <div 
-            className={`lg:col-span-8 glass-card rounded-3xl p-8 flex flex-col relative overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-2xl group`}
+            className={`lg:col-span-8 glass-card rounded-[2rem] p-10 flex flex-col relative overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-2xl group border-white/5`}
             onClick={() => setSelectedCard({ id: 'current-conditions', title: 'Current Conditions' })}
           >
-            <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${weatherData?.gradient || 'from-primary/20 to-transparent'} blur-3xl opacity-30 -mr-20 -mt-20 transition-all duration-700 group-hover:scale-150 group-hover:opacity-50`} />
+            <div className={`absolute top-0 right-0 w-96 h-96 bg-gradient-to-br ${weatherData?.gradient || 'from-primary/20 to-transparent'} blur-[100px] opacity-20 -mr-32 -mt-32 transition-all duration-700 group-hover:scale-150 group-hover:opacity-40`} />
             
-            <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8 relative z-10">
-              <div>
-                <p className="text-label-caps text-on-surface-variant mb-1 group-hover:text-primary transition-colors">CURRENT CONDITIONS</p>
-                <h3 className="text-h1-hero text-on-surface leading-none group-hover:translate-x-1 transition-transform">
-                  {weatherData ? `${formatTemp(weatherData.temperature, unit)}°` : '--'}
-                </h3>
-                <p className="text-body-lg text-on-surface-variant mt-2 group-hover:text-on-surface transition-colors">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-10 relative z-10">
+              <div className="space-y-4">
+                <p className="text-[11px] font-bold text-primary tracking-[0.25em] group-hover:translate-x-1 transition-transform uppercase">CURRENT CONDITIONS</p>
+                <div className="flex items-center gap-4">
+                  <h3 className="text-7xl font-bold text-on-surface tracking-tighter">
+                    {weatherData ? `${formatTemp(weatherData.temperature, unit)}°` : '--'}
+                  </h3>
+                  <span className="material-symbols-outlined text-6xl text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)] transition-all duration-500 group-hover:scale-125 group-hover:rotate-12" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    {weatherData?.icon || 'wb_sunny'}
+                  </span>
+                </div>
+                <p className="text-xl text-on-surface-variant font-medium flex items-center gap-2">
                   {weatherData ? `${weatherData.condition} • ${weatherData.city}` : 'Fetching weather...'}
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 </p>
               </div>
-              <div className="flex flex-col items-end gap-2 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3">
-                <span className="material-symbols-outlined text-6xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  {weatherData?.icon || 'cloud'}
-                </span>
-                {weatherData?.ml_available && (
-                  <span className="text-label-caps text-primary bg-primary/10 px-2 py-1 rounded">AI POWERED</span>
-                )}
-              </div>
+              
+              {weatherData?.ml_available && (
+                <div className="flex flex-col items-end">
+                  <div className="px-4 py-2 rounded-2xl bg-primary/20 border border-primary/30 backdrop-blur-md shadow-lg shadow-primary/10">
+                    <p className="text-[10px] font-black text-primary tracking-[0.2em]">AI POWERED ANALYSIS</p>
+                  </div>
+                </div>
+              )}
             </div>
+
 
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 relative z-10">
               {forecastLoading ? (
@@ -448,9 +466,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="lg:col-span-4 glass-card rounded-3xl p-8 flex flex-col">
-            <h4 className="text-h3-card-title text-on-surface mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">auto_awesome</span>
+          <div className="lg:col-span-4 glass-card rounded-[2rem] p-8 flex flex-col border-white/5">
+            <h4 className="text-xl font-bold text-on-surface mb-8 flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary p-2 bg-primary/10 rounded-xl">auto_awesome</span>
               AI Quick Insights
             </h4>
             <div className="space-y-6 flex-1">
@@ -462,44 +480,61 @@ export default function Dashboard() {
                 />
               ))}
             </div>
+            
+            <button 
+              className="mt-8 w-full py-4 rounded-2xl bg-primary/5 border border-primary/20 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-all group"
+              onClick={() => setSelectedCard({ id: 'insight', title: 'Climate Intelligence Report', description: 'Detailed AI analysis of current atmospheric trends.' })}
+            >
+              View Full Insights
+              <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </button>
           </div>
 
+
           <div 
-            className="lg:col-span-12 glass-card rounded-3xl p-8 cursor-pointer group transition-all duration-300 hover:shadow-2xl"
+            className="lg:col-span-12 glass-card rounded-[2.5rem] p-10 cursor-pointer group transition-all duration-500 hover:shadow-2xl border-white/5 relative overflow-hidden"
             onClick={() => setSelectedCard({ id: 'forecast', title: '5-Day Forecast' })}
           >
-            <div className="flex justify-between items-center mb-6">
-              <h4 className="text-h3-card-title text-on-surface group-hover:text-primary transition-colors">5-Day Forecast</h4>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 text-primary text-label-caps font-bold">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="flex justify-between items-center mb-10 relative z-10">
+              <h4 className="text-2xl font-bold text-on-surface group-hover:text-primary transition-colors flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary">calendar_month</span>
+                5-Day Forecast
+              </h4>
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-2 text-primary text-[10px] font-black tracking-widest uppercase">
                 Detailed Outlook
-                <span className="material-symbols-outlined">open_in_full</span>
+                <span className="material-symbols-outlined text-sm">open_in_full</span>
               </div>
             </div>
             {forecastLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-12 bg-slate-800/40 rounded-xl animate-pulse" />)}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-48 bg-white/5 rounded-3xl animate-pulse" />)}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                 {forecastData?.daily?.slice(0, 5).map((f) => (
                   <div 
                     key={f.date} 
-                    className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30 flex flex-col items-center text-center hover:bg-slate-800/60 hover:scale-105 hover:shadow-xl transition-all duration-300 cursor-pointer group/item"
+                    className="p-6 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center hover:bg-white/10 hover:scale-[1.02] hover:shadow-2xl transition-all duration-500 cursor-pointer group/item"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedCard({ id: 'day-forecast', title: `${f.day} Forecast`, dayData: f });
                     }}
                   >
-                    <p className="text-label-caps text-on-surface-variant mb-2 group-hover/item:text-primary transition-colors">{f.day || '--'}</p>
-                    <span className="material-symbols-outlined text-3xl text-primary mb-2 transition-transform duration-500 group-hover/item:scale-125 group-hover/item:rotate-6">{f.icon || 'wb_sunny'}</span>
-                    <p className="text-h3-card-title text-on-surface">{formatTemp(f.max_temp, unit)}°</p>
-                    <p className="text-body-sm text-on-surface-variant">{formatTemp(f.min_temp, unit)}°</p>
-                    <p className="text-[10px] text-primary/70 mt-2">{f.condition || '--'}</p>
+                    <p className="text-[10px] font-black text-on-surface-variant mb-4 group-hover/item:text-primary transition-colors tracking-widest uppercase">{f.day || '--'}</p>
+                    <div className="p-4 rounded-2xl bg-primary/10 mb-4 group-hover/item:bg-primary/20 transition-colors">
+                      <span className="material-symbols-outlined text-4xl text-primary transition-transform duration-700 group-hover/item:scale-125 group-hover/item:rotate-12">{f.icon || 'wb_sunny'}</span>
+                    </div>
+                    <p className="text-3xl font-bold text-on-surface mb-1">{formatTemp(f.max_temp, unit)}°</p>
+                    <p className="text-sm text-on-surface-variant font-medium">{formatTemp(f.min_temp, unit)}°</p>
+                    <p className="text-[10px] font-bold text-primary/70 mt-4 tracking-wider uppercase">{f.condition || '--'}</p>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
         </div>
       </div>
 

@@ -23,7 +23,7 @@ export default function Settings() {
 
   return (
     <>
-      <header className="sticky top-0 right-0 h-20 px-6 lg:px-[var(--spacing-container-padding)] z-40 glass-topbar flex justify-between items-center">
+      <header className="sticky top-0 right-0 h-24 px-6 lg:px-[var(--spacing-container-padding)] z-40 glass-topbar flex justify-between items-center border-b border-white/5">
         <div className="flex items-center gap-8">
           <h2 className="text-h2-dashboard text-primary tracking-tight">Settings</h2>
           <div className="hidden md:flex gap-6">
@@ -48,44 +48,46 @@ export default function Settings() {
           <div className="col-span-12 lg:col-span-8 flex flex-col gap-[var(--spacing-card-gap)]">
             
             {/* Appearance */}
-            <section className="glass-panel p-8 rounded-3xl">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-secondary-container/20 rounded-2xl">
-                  <span className="material-symbols-outlined text-primary">palette</span>
+            <section className="glass-card p-10 rounded-[2rem] border border-white/10 shadow-2xl">
+              <div className="flex items-center gap-5 mb-10">
+                <div className="p-4 bg-primary/20 rounded-2xl">
+                  <span className="material-symbols-outlined text-primary text-2xl">palette</span>
                 </div>
                 <div>
-                  <h3 className="text-h3-card-title text-on-surface">Appearance</h3>
-                  <p className="text-on-surface-variant text-sm">Customize the interface visual properties.</p>
+                  <h3 className="text-2xl font-black text-on-surface tracking-tight">Appearance</h3>
+                  <p className="text-on-surface-variant/60 text-sm font-medium">Customize the interface visual properties.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div 
                   onClick={() => updateTheme('light')}
-                  className={`border-2 p-4 rounded-2xl bg-white/50 flex flex-col gap-4 cursor-pointer transition-all ${theme === 'light' ? 'border-primary shadow-lg' : 'border-outline-variant/30 opacity-60'}`}
+                  className={`border-2 p-5 rounded-[1.5rem] bg-white flex flex-col gap-5 cursor-pointer transition-all duration-500 hover:scale-[1.02] ${theme === 'light' ? 'border-primary shadow-[0_0_30px_rgba(192,132,252,0.2)]' : 'border-white/10 opacity-40 hover:opacity-100'}`}
                 >
-                  <div className="w-full h-24 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-                    <div className="w-3/4 h-2/3 bg-white shadow-sm rounded-md p-2 flex flex-col gap-1">
-                      <div className="w-1/2 h-2 bg-primary/20 rounded" />
-                      <div className="w-full h-2 bg-slate-200 rounded" />
+                  <div className="w-full h-32 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden border border-slate-100">
+                    <div className="w-3/4 h-2/3 bg-white shadow-xl rounded-lg p-3 flex flex-col gap-2">
+                      <div className="w-1/2 h-2.5 bg-primary/20 rounded-full" />
+                      <div className="w-full h-2.5 bg-slate-100 rounded-full" />
+                      <div className="w-2/3 h-2.5 bg-slate-100 rounded-full" />
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-body-main font-semibold">Light Mode</span>
+                    <span className="text-lg font-bold text-slate-900">Light Reflection</span>
                     {theme === 'light' && <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>}
                   </div>
                 </div>
                 <div 
                   onClick={() => updateTheme('dark')}
-                  className={`border-2 p-4 rounded-2xl bg-slate-900 flex flex-col gap-4 cursor-pointer transition-all ${theme === 'dark' ? 'border-primary shadow-lg' : 'border-outline-variant/30 opacity-60'}`}
+                  className={`border-2 p-5 rounded-[1.5rem] bg-[#030712] flex flex-col gap-5 cursor-pointer transition-all duration-500 hover:scale-[1.02] ${theme === 'dark' ? 'border-primary shadow-[0_0_30px_rgba(192,132,252,0.3)]' : 'border-white/10 opacity-40 hover:opacity-100'}`}
                 >
-                  <div className="w-full h-24 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden">
-                    <div className="w-3/4 h-2/3 bg-slate-700 shadow-sm rounded-md p-2 flex flex-col gap-1">
-                      <div className="w-1/2 h-2 bg-primary/40 rounded" />
-                      <div className="w-full h-2 bg-slate-600 rounded" />
+                  <div className="w-full h-32 bg-[#0a0a14] rounded-xl flex items-center justify-center overflow-hidden border border-white/5">
+                    <div className="w-3/4 h-2/3 bg-[#111322] shadow-2xl rounded-lg p-3 flex flex-col gap-2 border border-white/5">
+                      <div className="w-1/2 h-2.5 bg-primary/40 rounded-full" />
+                      <div className="w-full h-2.5 bg-white/5 rounded-full" />
+                      <div className="w-2/3 h-2.5 bg-white/5 rounded-full" />
                     </div>
                   </div>
-                  <div className="flex justify-between items-center text-white">
-                    <span className="text-body-main font-semibold">Atmospheric Dark</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold text-white tracking-tight">Midnight Premium</span>
                     {theme === 'dark' && <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>}
                   </div>
                 </div>
@@ -93,14 +95,14 @@ export default function Settings() {
             </section>
 
             {/* Unit Preferences */}
-            <section className="glass-panel p-8 rounded-3xl">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-secondary-container/20 rounded-2xl">
-                  <span className="material-symbols-outlined text-primary">thermostat</span>
+            <section className="glass-card p-10 rounded-[2rem] border border-white/10">
+              <div className="flex items-center gap-5 mb-10">
+                <div className="p-4 bg-primary/20 rounded-2xl">
+                  <span className="material-symbols-outlined text-primary text-2xl">thermostat</span>
                 </div>
                 <div>
-                  <h3 className="text-h3-card-title text-on-surface">Unit Preferences</h3>
-                  <p className="text-on-surface-variant text-sm">Select global measurement standards for climate data.</p>
+                  <h3 className="text-2xl font-black text-on-surface tracking-tight">Unit Preferences</h3>
+                  <p className="text-on-surface-variant/60 text-sm font-medium">Global measurement standards.</p>
                 </div>
               </div>
               <div className="space-y-6">
@@ -128,33 +130,37 @@ export default function Settings() {
             </section>
 
             {/* AI Engine Controls */}
-            <section className="glass-panel p-8 rounded-3xl">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-secondary-container/20 rounded-2xl">
-                  <span className="material-symbols-outlined text-primary">auto_awesome</span>
+            <section className="glass-card p-10 rounded-[2rem] border border-white/10">
+              <div className="flex items-center gap-5 mb-10">
+                <div className="p-4 bg-primary/20 rounded-2xl">
+                  <span className="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
                 </div>
                 <div>
-                  <h3 className="text-h3-card-title text-on-surface">AI Engine Controls</h3>
-                  <p className="text-on-surface-variant text-sm">Manage Clima-Cast's intelligence models.</p>
+                  <h3 className="text-2xl font-black text-on-surface tracking-tight">AI Engine Controls</h3>
+                  <p className="text-on-surface-variant/60 text-sm font-medium">Manage Clima-Cast's intelligence models.</p>
                 </div>
               </div>
-              <div className="space-y-4">
-                <div className="p-6 bg-surface-container/30 rounded-2xl flex items-center justify-between">
-                  <div className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-primary mt-1">psychology</span>
+              <div className="space-y-6">
+                <div className="p-7 bg-white/5 rounded-[1.5rem] border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors group">
+                  <div className="flex items-start gap-5">
+                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                      <span className="material-symbols-outlined text-primary">psychology</span>
+                    </div>
                     <div>
-                      <p className="text-body-main font-semibold text-on-surface">Confidence Visualization</p>
-                      <p className="text-sm text-on-surface-variant max-w-md">Display probability percentages and model confidence levels on all AI-driven insights.</p>
+                      <p className="text-lg font-bold text-on-surface">Confidence Visualization</p>
+                      <p className="text-sm text-on-surface-variant/60 max-w-md font-medium">Display probability percentages and model confidence levels.</p>
                     </div>
                   </div>
                   <ToggleSwitch id="show-confidence" checked={showConfidence} onChange={(e) => updateConfidence(e.target.checked)} />
                 </div>
-                <div className="p-6 bg-surface-container/30 rounded-2xl flex items-center justify-between">
-                  <div className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-primary mt-1">model_training</span>
+                <div className="p-7 bg-white/5 rounded-[1.5rem] border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors group">
+                  <div className="flex items-start gap-5">
+                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                      <span className="material-symbols-outlined text-primary">model_training</span>
+                    </div>
                     <div>
-                      <p className="text-body-main font-semibold text-on-surface">Hyper-Local Refinement</p>
-                      <p className="text-sm text-on-surface-variant max-w-md">Enable real-time data ingestion from local IoT stations for ultra-precise precipitation forecasts.</p>
+                      <p className="text-lg font-bold text-on-surface">Hyper-Local Refinement</p>
+                      <p className="text-sm text-on-surface-variant/60 max-w-md font-medium">Enable real-time data ingestion from local IoT stations.</p>
                     </div>
                   </div>
                   <ToggleSwitch id="hyper-local" checked={hyperLocal} onChange={(e) => setHyperLocal(e.target.checked)} />
