@@ -63,3 +63,4 @@ websockets==16.0
 xgboost==3.2.0
 httpx
 slowapi
+fastapi-mail==1.4.1

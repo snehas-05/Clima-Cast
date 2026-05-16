@@ -10,9 +10,10 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
-  const [socialNotice, setSocialNotice] = useState('');
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotStatus, setForgotStatus] = useState({ loading: false, message: '', type: '' });
   
-  const { login } = useAuth();
+  const { login, forgotPassword } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -35,43 +36,27 @@ export default function Login() {
     }
   };
 
-  const handleSocialClick = (provider) => {
-    setSocialNotice(`${provider} login is currently in beta. Please use your email to continue.`);
-    setTimeout(() => setSocialNotice(''), 3000);
+  const handleForgotSubmit = async () => {
+    if (!forgotEmail) return;
+    setForgotStatus({ loading: true, message: '', type: '' });
+    try {
+      const res = await forgotPassword(forgotEmail);
+      if (res.data.success) {
+        setForgotStatus({ loading: false, message: res.data.message, type: 'success' });
+        setTimeout(() => setShowForgotModal(false), 3000);
+      } else {
+        setForgotStatus({ loading: false, message: res.data.error || 'Failed to send reset link', type: 'error' });
+      }
+    } catch (err) {
+      setForgotStatus({ loading: false, message: 'Server error occurred', type: 'error' });
+    }
   };
 
   return (
     <div className="relative z-10 w-full max-w-[480px] mx-auto glass-panel rounded-xl shadow-[0_40px_60px_-15px_rgba(15,23,42,0.08)] p-10 flex flex-col gap-8">
       <div className="text-center">
         <h1 className="text-h2-dashboard text-primary mb-2">Welcome Back</h1>
-        <p className="text-body-main text-on-surface-variant">Access your intelligence dashboard</p>
-      </div>
-
-      <div className="space-y-4">
-        {socialNotice && (
-          <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg text-primary text-xs text-center animate-fade-in">
-            {socialNotice}
-          </div>
-        )}
-        <div className="grid grid-cols-2 gap-4">
-          {['Google', 'Apple'].map((p) => (
-            <button 
-              key={p} 
-              type="button" 
-              onClick={() => handleSocialClick(p)}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-outline-variant/30 bg-white/40 hover:bg-white/60 transition-all active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[20px]">{p === 'Google' ? 'g_translate' : 'phone_iphone'}</span>
-              <span className="text-label-caps text-on-surface">{p}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative flex items-center">
-        <div className="flex-grow border-t border-outline-variant/30" />
-        <span className="flex-shrink mx-4 text-label-caps text-on-surface-variant/60">OR CONTINUE WITH EMAIL</span>
-        <div className="flex-grow border-t border-outline-variant/30" />
+        <p className="text-body-main text-on-surface">Access your intelligence dashboard</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -107,7 +92,7 @@ export default function Login() {
         </button>
       </form>
 
-      <p className="text-center text-body-main text-on-surface-variant">
+      <p className="text-center text-body-main text-on-surface">
         Don't have an account? <Link to="/signup" className="text-primary font-semibold hover:underline">Create account</Link>
       </p>
 
@@ -117,17 +102,27 @@ export default function Login() {
         title="Reset Password"
       >
         <div className="space-y-6">
-          <p className="text-body-lg text-on-surface-variant">Enter your email address and we'll send you a link to reset your atmospheric intelligence access.</p>
+          <p className="text-body-lg text-on-surface">Enter your email address and we'll send you a link to reset your atmospheric intelligence access.</p>
           <div className="space-y-4">
-            <FormField label="EMAIL ADDRESS" icon="mail" type="email" placeholder="name@example.com" />
+            {forgotStatus.message && (
+              <div className={`p-3 rounded text-sm ${forgotStatus.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {forgotStatus.message}
+              </div>
+            )}
+            <FormField 
+              label="EMAIL ADDRESS" 
+              icon="mail" 
+              type="email" 
+              placeholder="name@example.com" 
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+            />
             <button 
-              onClick={() => {
-                alert('Reset link sent to your email!');
-                setShowForgotModal(false);
-              }}
-              className="w-full py-4 bg-primary text-on-primary rounded-xl font-bold shadow-lg hover:opacity-90 transition-all"
+              onClick={handleForgotSubmit}
+              disabled={forgotStatus.loading}
+              className="w-full py-4 bg-primary text-on-primary rounded-xl font-bold shadow-lg hover:opacity-90 transition-all disabled:opacity-50"
             >
-              Send Reset Link
+              {forgotStatus.loading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </div>
         </div>

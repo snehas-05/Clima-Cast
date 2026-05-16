@@ -87,6 +87,7 @@ export const AuthProvider = ({ children }) => {
         login: handleLogin,
         signup: handleSignup,
         logout: handleLogout,
+        forgotPassword: authService.forgotPassword,
       }}
     >
       {children}

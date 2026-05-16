@@ -5,10 +5,12 @@ from typing import Any
 from app.database.connection import get_db
 from app.models.user import User
 from app.models.preferences import UserPreference, ThemeType, UnitType
-from app.schemas.user import UserCreate, UserLogin, UserResponse, StandardResponse
+from app.schemas.user import UserCreate, UserLogin, UserResponse, StandardResponse, ForgotPasswordRequest, ResetPasswordRequest
 from app.utils.hashing import hash_password, verify_password
-from app.utils.jwt import create_access_token
+from app.utils.jwt import create_access_token, verify_token
 from app.utils.auth_deps import get_current_user
+from app.services.mail_service import mail_service
+from datetime import timedelta
 
 router = APIRouter()
 
@@ -104,6 +106,75 @@ def get_profile(current_user: User = Depends(get_current_user)) -> Any:
             "user": UserResponse.model_validate(current_user).model_dump()
         }
     )
+
+@router.post("/forgot-password", response_model=StandardResponse)
+async def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)) -> Any:
+    try:
+        user = db.query(User).filter(User.email == request.email).first()
+        if not user:
+            # We return success even if user not found for security (preventing account enumeration)
+            return StandardResponse(
+                success=True,
+                message="If this email is registered, a reset link has been sent.",
+            )
+            
+        # Generate reset token (expires in 30 mins)
+        token = create_access_token(
+            data={"sub": user.email, "type": "reset"}, 
+            expires_delta=timedelta(minutes=30)
+        )
+        
+        # Send email
+        await mail_service.send_reset_password_email(request.email, token)
+        
+        return StandardResponse(
+            success=True,
+            message="Password reset link sent successfully",
+        )
+    except Exception as e:
+        print(f"Forgot password error: {e}")
+        return StandardResponse(
+            success=False,
+            message="An error occurred while sending the reset link",
+            error=str(e)
+        )
+
+@router.post("/reset-password", response_model=StandardResponse)
+def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)) -> Any:
+    try:
+        payload = verify_token(request.token)
+        if not payload or payload.get("type") != "reset":
+            return StandardResponse(
+                success=False,
+                message="Invalid or expired reset token",
+                error="Invalid token"
+            )
+            
+        email = payload.get("sub")
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return StandardResponse(
+                success=False,
+                message="User not found",
+                error="User not found"
+            )
+            
+        # Update password
+        user.password_hash = hash_password(request.new_password)
+        db.commit()
+        
+        return StandardResponse(
+            success=True,
+            message="Password updated successfully. You can now log in with your new password.",
+        )
+    except Exception as e:
+        db.rollback()
+        print(f"Reset password error: {e}")
+        return StandardResponse(
+            success=False,
+            message="An error occurred during password reset",
+            error=str(e)
+        )
 
 @router.post("/logout", response_model=StandardResponse)
 def logout() -> Any:

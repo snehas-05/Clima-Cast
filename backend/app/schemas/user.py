@@ -42,3 +42,10 @@ class StandardResponse(BaseModel):
     message: str
     data: Optional[Any] = None
     error: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str

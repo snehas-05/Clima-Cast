@@ -61,7 +61,7 @@ export default function Signup() {
           <span className="material-symbols-outlined text-white text-[32px]">cloud_sync</span>
         </div>
         <h1 className="text-h2-dashboard text-primary tracking-tight">Clima-Cast</h1>
-        <p className="text-on-surface-variant text-body-main mt-1">Join the Atmospheric Intelligence Hub</p>
+        <p className="text-on-surface text-body-main mt-1">Join the Atmospheric Intelligence Hub</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,7 +78,7 @@ export default function Signup() {
 
         <div className="space-y-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-label-caps text-on-surface-variant">Password Strength</span>
+            <span className="text-label-caps text-on-surface">Password Strength</span>
             <span className="text-label-caps text-primary">Strong</span>
           </div>
           <div className="flex gap-1 h-1.5 w-full">
@@ -88,29 +88,13 @@ export default function Signup() {
           </div>
         </div>
 
-        <div className="flex items-start gap-3 py-2">
-          <input type="checkbox" id="terms" required className="w-5 h-5 text-primary border-outline-variant/50 rounded focus:ring-primary/20 bg-white/50 mt-0.5" />
-          <label htmlFor="terms" className="text-body-main text-on-surface-variant text-sm">
-            I accept the <Link to="#" className="text-primary font-semibold hover:underline">Terms of Service</Link> and <Link to="#" className="text-primary font-semibold hover:underline">Privacy Policy</Link>
-          </label>
-        </div>
-
         <button type="submit" disabled={isSubmitting} className="w-full py-4 px-6 bg-gradient-to-r from-primary to-primary-container text-white text-h3-card-title rounded-lg shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed">
           {isSubmitting ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
 
       <div className="mt-8 pt-8 border-t border-outline-variant/30 text-center">
-        <p className="text-on-surface-variant mb-6">Or continue with</p>
-        <div className="flex justify-center gap-4 mb-8">
-          {['Google', 'Apple'].map((p) => (
-            <button key={p} className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/60 border border-outline-variant/30 rounded-lg hover:bg-white/80 transition-all">
-              <span className="material-symbols-outlined text-[20px]">{p === 'Google' ? 'g_translate' : 'phone_iphone'}</span>
-              <span className="text-label-caps">{p}</span>
-            </button>
-          ))}
-        </div>
-        <p className="text-on-surface-variant">
+        <p className="text-on-surface">
           Already have an account? <Link to="/login" className="text-primary font-bold hover:underline ml-1">Login</Link>
         </p>
       </div>

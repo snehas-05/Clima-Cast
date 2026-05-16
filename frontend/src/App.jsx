@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ResetPassword from './pages/ResetPassword';
 import NotFound from './pages/NotFound';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSkeleton from './components/ui/LoadingSkeleton';
@@ -74,6 +75,7 @@ function AppContent() {
             <Route element={<AuthLayout />}>
               <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
               <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+              <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
             </Route>
           </Route>
 
