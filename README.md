@@ -290,7 +290,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 ---
 
 <p align="center">
-  <b>Maintainer: Sneha S</b><br>
+  <b>Maintainer: Sneha Singhania</b><br>
   <a href="https://github.com/snehas-05">GitHub</a> • 
   <a href="#">LinkedIn</a> • 
   <a href="#">Portfolio</a>
