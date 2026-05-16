@@ -55,7 +55,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="glass-panel max-w-[500px] w-full p-10 rounded-xl shadow-[0_40px_60px_-15px_rgba(15,23,42,0.08)]">
+    <div className="glass-panel max-w-[500px] w-full mx-auto p-10 rounded-xl shadow-[0_40px_60px_-15px_rgba(15,23,42,0.08)]">
       <div className="flex flex-col items-center mb-10">
         <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
           <span className="material-symbols-outlined text-white text-[32px]">cloud_sync</span>

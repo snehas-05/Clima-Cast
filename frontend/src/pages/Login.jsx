@@ -41,7 +41,7 @@ export default function Login() {
   };
 
   return (
-    <div className="relative z-10 w-full max-w-[480px] glass-panel rounded-xl shadow-[0_40px_60px_-15px_rgba(15,23,42,0.08)] p-10 flex flex-col gap-8">
+    <div className="relative z-10 w-full max-w-[480px] mx-auto glass-panel rounded-xl shadow-[0_40px_60px_-15px_rgba(15,23,42,0.08)] p-10 flex flex-col gap-8">
       <div className="text-center">
         <h1 className="text-h2-dashboard text-primary mb-2">Welcome Back</h1>
         <p className="text-body-main text-on-surface-variant">Access your intelligence dashboard</p>
