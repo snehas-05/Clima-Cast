@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import TopBar from '../components/layout/TopBar';
 import { useWeather } from '../hooks/useWeather';
 import { useWeatherContext } from '../context/WeatherContext';

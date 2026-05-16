@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import TopBar from '../components/layout/TopBar';
 import MetricCard from '../components/cards/MetricCard';
 import HourCard from '../components/cards/HourCard';

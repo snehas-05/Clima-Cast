@@ -6,6 +6,20 @@ import { useAtmosphericText } from '../../hooks/useAtmosphericText';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useMemo } from 'react';
 
+export default function MetricCard({ 
+  id, 
+  icon, 
+  label, 
+  value, 
+  subLabel, 
+  trend, 
+  trendDirection, 
+  iconBg = 'bg-primary/10', 
+  iconColor = 'text-primary', 
+  loading, 
+  delay = 0, 
+  onClick 
+}) {
   const { getMetricVernacular } = useAtmosphericText();
   const { reduceAtmospheric } = usePreferences();
   
