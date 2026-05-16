@@ -3,12 +3,15 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import Footer from './Footer';
+import AtmosphericBackground from './AtmosphericBackground';
+import { useAtmosphericStyles } from '../../hooks/useAtmosphericStyles';
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useAtmosphericStyles();
 
   return (
-    <div className="min-h-screen mesh-gradient-subtle">
+    <AtmosphericBackground>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="lg:ml-[280px] min-h-screen flex flex-col main-content-responsive">
@@ -23,6 +26,6 @@ export default function DashboardLayout() {
         <Outlet />
         <Footer />
       </div>
-    </div>
+    </AtmosphericBackground>
   );
 }

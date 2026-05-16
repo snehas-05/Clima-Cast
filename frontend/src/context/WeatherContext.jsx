@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import api from '../services/api';
 import axios from 'axios';
+import { getAtmosphericState } from '../utils/atmosphericEngine';
 
 const WeatherContext = createContext();
 
@@ -12,6 +13,7 @@ export const WeatherProvider = ({ children }) => {
   const [isGPSMode, setIsGPSMode] = useState(localStorage.getItem('is_gps_mode') === 'true');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
   
   const hasInitialized = useRef(false);
 
@@ -92,6 +94,32 @@ export const WeatherProvider = ({ children }) => {
     localStorage.setItem('is_gps_mode', 'false');
   }, []);
 
+  // Shared Weather Fetcher for Atmosphere
+  const fetchCurrentWeather = useCallback(async () => {
+    try {
+      let endpoint = '/weather/current';
+      let params = { city: activeCity };
+      
+      if (isGPSMode && coordinates) {
+        endpoint = '/weather/by-coordinates';
+        params = { lat: coordinates.lat, lon: coordinates.lon };
+      }
+
+      const response = await api.get(endpoint, { params });
+      if (response.data.success) {
+        setWeatherData(response.data.data);
+      }
+    } catch (err) {
+      console.error("Atmospheric fetch error:", err);
+    }
+  }, [activeCity, isGPSMode, coordinates]);
+
+  useEffect(() => {
+    fetchCurrentWeather();
+  }, [fetchCurrentWeather]);
+
+  const atmosphericState = useMemo(() => getAtmosphericState(weatherData), [weatherData]);
+
   // Reset to GPS
   const resetToGPS = useCallback(() => {
     triggerGPS(true);
@@ -104,6 +132,8 @@ export const WeatherProvider = ({ children }) => {
       isGPSMode, 
       loading, 
       error, 
+      weatherData,
+      atmosphericState,
       setCity, 
       resetToGPS 
     }}>

@@ -206,7 +206,9 @@ class WeatherService:
             "condition": theme["label"],
             "icon": theme["icon"],
             "gradient": theme["gradient"],
-            "raw_icon": weather.get("icon")
+            "raw_icon": weather.get("icon"),
+            "sunrise_ts": api_data.get("sys", {}).get("sunrise"),
+            "sunset_ts": api_data.get("sys", {}).get("sunset")
         }
 
 

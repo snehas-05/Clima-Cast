@@ -65,7 +65,11 @@ export default function Sidebar({ isOpen, onClose }) {
         }}
         transition={{ duration: TIMING.MEDIUM, ease: EASING.CINEMATIC }}
         className={`fixed left-0 top-0 h-full w-[280px] glass-sidebar flex flex-col py-8 px-6 gap-y-4 z-50
-          lg:translate-x-0 dark:bg-[#030712]/95 dark:border-r dark:border-white/5 shadow-2xl`}
+          lg:translate-x-0 dark:bg-[#030712]/95 dark:border-r dark:border-white/5 shadow-2xl transition-colors duration-1000`}
+        style={{
+          '--accent-glow': 'var(--atmospheric-glow, rgba(var(--primary-rgb), 0.05))',
+          background: 'linear-gradient(to bottom, var(--accent-glow) 0%, transparent 100%)'
+        }}
         aria-label="Main Navigation Sidebar"
       >
         {/* Brand */}
@@ -144,10 +148,6 @@ export default function Sidebar({ isOpen, onClose }) {
           ))}
         </div>
       </motion.aside>
-    </>
-  );
-}
-
     </>
   );
 }

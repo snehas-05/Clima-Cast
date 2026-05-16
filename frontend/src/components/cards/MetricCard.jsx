@@ -2,22 +2,21 @@ import LoadingSkeleton from '../ui/LoadingSkeleton';
 import AnimatedCard from '../ui/AnimatedCard';
 import { motion } from 'framer-motion';
 import { TIMING, EASING } from '../../utils/motion';
+import { useAtmosphericText } from '../../hooks/useAtmosphericText';
+import { usePreferences } from '../../context/PreferencesContext';
+import { useMemo } from 'react';
 
-export default function MetricCard({
-  icon,
-  iconBg = 'bg-primary/10',
-  iconColor = 'text-primary',
-  label,
-  value,
-  subLabel,
-  trend,
-  trendDirection,
-  loading = false,
-  onClick,
-  delay = 0
-}) {
+  const { getMetricVernacular } = useAtmosphericText();
+  const { reduceAtmospheric } = usePreferences();
+  
   const trendColor = trendDirection === 'up' ? 'text-green-400' : trendDirection === 'down' ? 'text-red-400' : 'text-emerald-400';
   const trendIcon = trendDirection === 'up' ? 'trending_up' : trendDirection === 'down' ? 'trending_down' : null;
+
+  const displaySubLabel = useMemo(() => {
+    // If we have an ID (e.g., 'temp'), try to get a smart vernacular label first
+    const smartLabel = id ? getMetricVernacular(id, value) : null;
+    return smartLabel || subLabel;
+  }, [id, value, getMetricVernacular, subLabel]);
 
   if (loading) {
     return (
@@ -58,28 +57,30 @@ export default function MetricCard({
         <div className="flex items-baseline gap-2">
           <h3 className="text-3xl font-bold text-on-surface tracking-tight group-hover:translate-x-1 transition-transform duration-500">{value}</h3>
         </div>
-        {subLabel && (
-          <p className="text-xs text-on-surface-variant/70 font-medium">{subLabel}</p>
+        {displaySubLabel && (
+          <p className="text-xs text-on-surface-variant/70 font-medium">{displaySubLabel}</p>
         )}
       </div>
 
       {/* Simplified Sparkline Placeholder */}
-      <div className="mt-4 h-8 w-full opacity-30 group-hover:opacity-60 transition-opacity duration-500">
-        <svg viewBox="0 0 100 20" className="w-full h-full overflow-visible">
-          <motion.path 
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.5, delay: delay + 0.5, ease: EASING.CINEMATIC }}
-            d="M0 15 Q 25 5, 50 12 T 100 8" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            className={iconColor}
-          />
-        </svg>
-      </div>
+      {!reduceAtmospheric && (
+        <div className="mt-4 h-8 w-full opacity-30 group-hover:opacity-60 transition-opacity duration-500">
+          <svg viewBox="0 0 100 20" className="w-full h-full overflow-visible">
+            <motion.path 
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.5, delay: delay + 0.5, ease: EASING.CINEMATIC }}
+              d="M0 15 Q 25 5, 50 12 T 100 8" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              className={iconColor}
+            />
+          </svg>
+        </div>
+      )}
 
-      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-700" />
+      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-[var(--atmospheric-glow,rgba(var(--primary-rgb),0.05))] rounded-full blur-2xl group-hover:bg-[var(--atmospheric-glow,rgba(var(--primary-rgb),0.1))] transition-colors duration-700" />
     </AnimatedCard>
   );
 }

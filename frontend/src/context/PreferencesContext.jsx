@@ -11,7 +11,8 @@ export const PreferencesProvider = ({ children }) => {
   const [preferences, setPreferences] = useState({
     theme: localStorage.getItem('theme') || 'dark',
     unit: localStorage.getItem('unit') || 'celsius',
-    showConfidence: localStorage.getItem('showConfidence') !== 'false'
+    showConfidence: localStorage.getItem('showConfidence') !== 'false',
+    reduceAtmospheric: localStorage.getItem('reduceAtmospheric') === 'true'
   });
 
   // Load preferences from backend on mount or when user logs in
@@ -27,7 +28,8 @@ export const PreferencesProvider = ({ children }) => {
             const updatedPrefs = {
               theme: serverPrefs.theme,
               unit: serverPrefs.unit,
-              showConfidence: serverPrefs.show_confidence
+              showConfidence: serverPrefs.show_confidence,
+              reduceAtmospheric: serverPrefs.reduce_atmospheric || false
             };
             setPreferences(updatedPrefs);
             
@@ -35,6 +37,7 @@ export const PreferencesProvider = ({ children }) => {
             localStorage.setItem('theme', updatedPrefs.theme);
             localStorage.setItem('unit', updatedPrefs.unit);
             localStorage.setItem('showConfidence', updatedPrefs.showConfidence);
+            localStorage.setItem('reduceAtmospheric', updatedPrefs.reduceAtmospheric);
           }
         } catch (error) {
           console.error("Failed to load preferences from server", error);
@@ -53,6 +56,7 @@ export const PreferencesProvider = ({ children }) => {
     if (newPrefs.theme) localStorage.setItem('theme', newPrefs.theme);
     if (newPrefs.unit) localStorage.setItem('unit', newPrefs.unit);
     if (newPrefs.showConfidence !== undefined) localStorage.setItem('showConfidence', newPrefs.showConfidence);
+    if (newPrefs.reduceAtmospheric !== undefined) localStorage.setItem('reduceAtmospheric', newPrefs.reduceAtmospheric);
     
     // Server persistence
     if (token) {
@@ -60,7 +64,8 @@ export const PreferencesProvider = ({ children }) => {
         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/settings/preferences`, {
           theme: updated.theme,
           unit: updated.unit,
-          show_confidence: updated.showConfidence
+          show_confidence: updated.showConfidence,
+          reduce_atmospheric: updated.reduceAtmospheric
         }, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -73,9 +78,10 @@ export const PreferencesProvider = ({ children }) => {
   const updateTheme = (theme) => savePreferences({ theme });
   const updateUnit = (unit) => savePreferences({ unit });
   const updateConfidence = (showConfidence) => savePreferences({ showConfidence });
-
+  const updateAtmospheric = (reduceAtmospheric) => savePreferences({ reduceAtmospheric });
+  
   return (
-    <PreferencesContext.Provider value={{ ...preferences, updateTheme, updateUnit, updateConfidence }}>
+    <PreferencesContext.Provider value={{ ...preferences, updateTheme, updateUnit, updateConfidence, updateAtmospheric }}>
       {children}
     </PreferencesContext.Provider>
   );

@@ -81,7 +81,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-8 space-y-8 animate-fade-in bg-background min-h-screen">
+      <div className="flex-1 p-8 space-y-8 animate-fade-in min-h-0">
         <div className="flex justify-between items-center mb-8">
           <LoadingSkeleton height="3rem" width="250px" />
           <div className="flex gap-4">
@@ -438,6 +438,7 @@ export default function Dashboard() {
           {metrics.map((m, idx) => (
             <MetricCard 
               key={m.label} 
+              id={m.id}
               {...m} 
               delay={idx * 0.05}
               onClick={() => setSelectedCard({ ...m, id: m.id })}

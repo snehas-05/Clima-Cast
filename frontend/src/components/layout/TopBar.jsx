@@ -8,6 +8,7 @@ import api from '../../services/api';
 import { useEffect, useRef } from 'react';
 
 import { useWeatherContext } from '../../context/WeatherContext';
+import { useAtmosphericText } from '../../hooks/useAtmosphericText';
 
 const IconButton = ({ icon, onClick, ariaLabel }) => (
   <button 
@@ -27,6 +28,7 @@ export default function TopBar({ title, subtitle, children }) {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { getStatusOutlook } = useAtmosphericText();
   const searchRef = useRef(null);
 
   const handleSearch = async (e) => {
@@ -78,9 +80,9 @@ export default function TopBar({ title, subtitle, children }) {
         <div className="flex items-center gap-8">
           <div>
             <h2 className="text-h2-dashboard text-primary truncate max-w-[200px] sm:max-w-none">{title}</h2>
-            {subtitle && (
-              <p className="text-label-caps text-on-surface-variant/60 text-[10px] sm:text-xs">{subtitle}</p>
-            )}
+            <p className="text-label-caps text-on-surface-variant/60 text-[10px] sm:text-xs">
+              {subtitle || getStatusOutlook}
+            </p>
           </div>
         </div>
 
