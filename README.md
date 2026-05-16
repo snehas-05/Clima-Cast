@@ -57,6 +57,10 @@ In an era of climate volatility, traditional weather apps often fail to provide 
 - **Smart Theming**: Advanced glassmorphism with seamless Dark/Light/Atmospheric transitions.
 - **Accessibility Mode**: High-contrast, reduced-motion setting for distraction-free analysis.
 
+### 🔐 Security & Authentication
+- **Secure JWT Authentication**: Encrypted identity management with protected routes and persistent sessions.
+- **Account Recovery**: Token-based password reset flow integrated with an automated email recovery system.
+
 ### 🛠️ Production Engineering
 - **Robust Persistence**: MySQL 8.0 storage with SQLAlchemy ORM.
 - **Hybrid Caching**: Multi-layer caching strategy to minimize API costs and latency.
@@ -244,7 +248,7 @@ VITE_API_URL=http://localhost:8000
 ## 🛡️ Production Readiness & Security
 
 - **Performance**: Implemented **Async Batching** for analytics and **Lazy Loading** for route-level code splitting.
-- **Security**: All database inputs are sanitized via SQLAlchemy; no sensitive keys are committed to version control.
+- **Security**: Secure BCrypt hashing, expiring reset tokens, and multi-layer authenticated route protection.
 - **Accessibility**: 100% keyboard navigable with full ARIA support for dynamic charts.
 - **UX Excellence**: Reduced Layout Shift (CLS) through fixed-aspect-ratio chart containers and skeleton states.
 
