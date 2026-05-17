@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 import Modal from '../ui/Modal';
+import ThemeToggle from '../ui/ThemeToggle';
 
 export default function PublicLayout() {
   const navigate = useNavigate();
@@ -33,56 +34,27 @@ export default function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navigation */}
-      <header className="fixed top-0 w-full z-50 bg-slate-950/30 backdrop-blur-2xl border-b border-white/5 transition-colors duration-500 hover:bg-slate-950/50">
-        <div className="flex justify-between items-center h-20 px-6 lg:px-[var(--spacing-container-padding)] max-w-[1440px] mx-auto">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="text-h3-card-title font-light text-white tracking-widest drop-shadow-md">
-              Clima-Cast
-            </Link>
-            <nav className="hidden md:flex gap-8">
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  `text-label-caps tracking-wider transition-all duration-300 ${isActive
-                    ? 'text-white font-medium drop-shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                  }`
-                }
-              >
-                Home
-              </NavLink>
-              <NavLink
-                to="/about"
-                className={({ isActive }) =>
-                  `text-label-caps tracking-wider transition-all duration-300 ${isActive
-                    ? 'text-white font-medium drop-shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                  }`
-                }
-              >
-                About
-              </NavLink>
-            </nav>
-          </div>
-          <div className="flex items-center gap-6">
+      <header className="fixed top-0 w-full z-50 transition-colors duration-500 pt-6 pointer-events-none">
+        <div className="flex justify-center items-center px-6 lg:px-[var(--spacing-container-padding)] max-w-[1440px] mx-auto">
+          <div className="flex items-center gap-6 glass-card bg-slate-200/50 dark:bg-transparent !rounded-full px-6 py-3 pointer-events-auto shadow-md dark:shadow-2xl">
+            <ThemeToggle />
             <button 
               onClick={() => navigate('/login')}
-              className="material-symbols-outlined text-slate-500 hover:text-slate-300 transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full text-slate-700 dark:text-slate-400 hover:text-primary-forced dark:hover:text-white hover:bg-slate-900/10 dark:hover:bg-white/5 transition-colors"
               title="Notifications (Login required)"
             >
-              notifications
+              <span className="material-symbols-outlined">notifications</span>
             </button>
             <button 
               onClick={() => navigate('/login')}
-              className="material-symbols-outlined text-slate-500 hover:text-slate-300 transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full text-slate-700 dark:text-slate-400 hover:text-primary-forced dark:hover:text-white hover:bg-slate-900/10 dark:hover:bg-white/5 transition-colors"
               title="Profile (Login required)"
             >
-              account_circle
+              <span className="material-symbols-outlined">account_circle</span>
             </button>
             <Link
               to="/login"
-              className="hidden md:block bg-slate-800/80 border border-slate-700/50 text-slate-200 px-6 py-2 rounded-full text-label-caps tracking-wider hover:bg-slate-700 hover:text-white transition-all duration-300 shadow-lg shadow-black/20"
+              className="bg-indigo-600/90 text-white px-6 py-2 rounded-full text-label-caps tracking-wider hover:bg-indigo-500 transition-all duration-300 shadow-lg shadow-black/20"
             >
               Get Started
             </Link>

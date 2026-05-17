@@ -53,8 +53,8 @@
   --color-outline: #7a7582;
   --color-outline-variant: #cbc4d2;
 
-  --color-background: #fdf7ff;
-  --color-on-background: #1d1b20;
+  --color-background: #f4f7fb;
+  --color-on-background: #0f172a;
 
   /* ── Typography ── */
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -83,66 +83,50 @@
 }
 
 /* ============================================================
-   BASE STYLES
+   LIGHT/DARK THEME VARIABLES (FORCED CONTRAST)
    ============================================================ */
+:root {
+  --theme-bg: #eef4fa;
+  --theme-text-primary: #0f172a;
+  --theme-text-secondary: #475569;
+  --theme-card-bg: rgba(255, 255, 255, 0.85);
+  --theme-card-border: rgba(203, 213, 225, 0.6);
+  --theme-card-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12), 0 5px 15px -5px rgba(15, 23, 42, 0.05);
+  --theme-card-hover-border: rgba(99, 102, 241, 0.4);
+  --theme-card-hover-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18), 0 0 15px rgba(99, 102, 241, 0.08);
+  --theme-mesh-1: rgba(99, 102, 241, 0.15);
+  --theme-mesh-2: rgba(14, 165, 233, 0.15);
+  --theme-mesh-3: rgba(168, 85, 247, 0.1);
+}
+
+.dark {
+  --theme-bg: #030712;
+  --theme-text-primary: #ffffff;
+  --theme-text-secondary: #94a3b8;
+  --theme-card-bg: rgba(10, 12, 24, 0.6);
+  --theme-card-border: rgba(255, 255, 255, 0.05);
+  --theme-card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.02);
+  --theme-card-hover-border: rgba(168, 85, 247, 0.35);
+  --theme-card-hover-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.95), 0 0 20px rgba(168, 85, 247, 0.15);
+  --theme-mesh-1: rgba(168, 85, 247, 0.1);
+  --theme-mesh-2: rgba(14, 165, 233, 0.05);
+  --theme-mesh-3: transparent;
+}
 
 body {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-body-main);
   line-height: 1.5;
-  color: var(--color-on-background);
-  background-color: var(--color-background);
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text-primary) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-/* ============================================================
-   DARK MODE OVERRIDES
-   ============================================================ */
+.text-primary-forced { color: var(--theme-text-primary) !important; }
+.text-secondary-forced { color: var(--theme-text-secondary) !important; }
 
-.dark {
-  --color-background: #030712;
-  --color-on-background: #ffffff;
-  --color-surface: #0a0c18;
-  --color-on-surface: #ffffff;
-  --color-surface-dim: #030712;
-  --color-surface-bright: #1e293b;
-  --color-surface-container-lowest: #02040a;
-  --color-surface-container-low: #0a0c18;
-  --color-surface-container: #111322;
-  --color-surface-container-high: #1e1b4b;
-  --color-surface-container-highest: #2e2a5e;
-  --color-surface-variant: #1e1b4b;
-  --color-on-surface-variant: #cbd5e1;
-  --color-outline: #334155;
-  --color-outline-variant: #1e293b;
-  
-  --color-inverse-surface: #f8fafc;
-  --color-inverse-on-surface: #030712;
-
-  --color-primary: #c084fc;
-  --color-primary-container: #581c87;
-  --color-on-primary-container: #f5f3ff;
-}
-
-.dark .glass-card, .dark .glass-panel, .dark .glass-sidebar, .dark .glass-topbar {
-  background: rgba(10, 12, 24, 0.6);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.5),
-    0 20px 40px -10px rgba(0, 0, 0, 0.8),
-    inset 0 1px 1px rgba(255, 255, 255, 0.02);
-}
-
-.dark .mesh-gradient, .dark .mesh-gradient-subtle, .dark .atmospheric-bg, .dark .atmospheric-bg-alt {
-  background-color: #030712;
-  background-image:
-    radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
-}
 
 
 
@@ -161,35 +145,52 @@ body {
    ============================================================ */
 
 .glass-card {
-  background: rgba(var(--surface-rgb, 255, 255, 255), var(--glass-opacity, 0.7));
-  backdrop-filter: blur(var(--glass-blur, 24px));
-  -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
-  border: 1px solid rgba(var(--on-surface-rgb, 0, 0, 0), 0.05);
-  box-shadow: 0 40px 60px -15px rgba(15, 23, 42, 0.08);
-  transition: background 0.5s ease, backdrop-filter 0.5s ease, border 0.5s ease;
+  background-color: var(--theme-card-bg) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  border: 1px solid var(--theme-card-border) !important;
+  box-shadow: var(--theme-card-shadow) !important;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.4s ease, 
+              border-color 0.4s ease, 
+              box-shadow 0.4s ease !important;
+}
+
+.glass-card:hover, .hover-lift:hover {
+  transform: translateY(-6px) scale(1.01) !important;
+  border-color: var(--theme-card-hover-border) !important;
+  box-shadow: var(--theme-card-hover-shadow) !important;
+}
+
+.hover-lift {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.4s ease, 
+              border-color 0.4s ease, 
+              box-shadow 0.4s ease !important;
 }
 
 .glass-panel {
-  background: rgba(var(--surface-rgb, 255, 255, 255), var(--glass-opacity, 0.7));
-  backdrop-filter: blur(var(--glass-blur, 24px));
-  -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
-  border: 1px solid rgba(var(--on-surface-rgb, 0, 0, 0), 0.05);
+  background-color: var(--theme-card-bg) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  border: 1px solid var(--theme-card-border) !important;
+  box-shadow: var(--theme-card-shadow) !important;
 }
 
 .glass-sidebar {
-  background: rgba(var(--surface-rgb, 255, 255, 255), var(--glass-opacity, 0.7));
-  backdrop-filter: blur(var(--glass-blur, 48px));
-  -webkit-backdrop-filter: blur(var(--glass-blur, 48px));
-  border-right: 1px solid rgba(var(--on-surface-rgb, 0, 0, 0), 0.05);
-  box-shadow: 40px 0 60px -15px rgba(15, 23, 42, 0.08);
+  background-color: var(--theme-card-bg) !important;
+  backdrop-filter: blur(48px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(150%) !important;
+  border-right: 1px solid var(--theme-card-border) !important;
+  box-shadow: 40px 0 60px -15px rgba(15, 23, 42, 0.15);
 }
 
 .glass-topbar {
-  background: rgba(var(--surface-rgb, 255, 255, 255), var(--glass-opacity, 0.7));
-  backdrop-filter: blur(var(--glass-blur, 48px));
-  -webkit-backdrop-filter: blur(var(--glass-blur, 48px));
-  border-bottom: 1px solid rgba(var(--on-surface-rgb, 0, 0, 0), 0.05);
-  box-shadow: 0 40px 60px -15px rgba(15, 23, 42, 0.08);
+  background-color: var(--theme-card-bg) !important;
+  backdrop-filter: blur(48px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(150%) !important;
+  border-bottom: 1px solid var(--theme-card-border) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
 }
 
 .glow-primary {
@@ -218,30 +219,24 @@ body {
    ============================================================ */
 
 .mesh-gradient {
-  background-color: #fdf7ff;
+  background-color: var(--theme-bg) !important;
   background-image:
-    radial-gradient(at 0% 0%, rgba(207, 188, 255, 0.3) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(233, 221, 255, 0.3) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(225, 212, 253, 0.3) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(201, 167, 77, 0.1) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, var(--theme-mesh-1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, var(--theme-mesh-2) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, var(--theme-mesh-3) 0px, transparent 50%) !important;
+  transition: background-color 0.5s ease;
 }
 
 .mesh-gradient-subtle {
-  background-color: #F8FAFC;
-  background-image:
-    radial-gradient(at 0% 0%, rgba(207, 188, 255, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(231, 195, 101, 0.1) 0px, transparent 50%);
+  background-color: var(--theme-bg) !important;
 }
 
 .atmospheric-bg {
-  background:
-    radial-gradient(circle at 20% 30%, #e9ddff 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, #ffdf93 0%, transparent 40%),
-    linear-gradient(180deg, #fdf7ff 0%, #f2ecf4 100%);
+  background-color: var(--theme-bg) !important;
 }
 
 .atmospheric-bg-alt {
-  background: radial-gradient(circle at top right, #e9ddff 0%, #fdf7ff 50%, #e1d4fd 100%);
+  background-color: var(--theme-bg) !important;
 }
 
 /* ============================================================
@@ -319,6 +314,27 @@ body {
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbc4d2; border-radius: 10px; }
+
+/* Premium Modal Custom Scrollbar */
+.modal-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.55);
+}
+.dark .modal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+}
+.dark .modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
 
 /* ============================================================
    RESPONSIVE SIDEBAR
