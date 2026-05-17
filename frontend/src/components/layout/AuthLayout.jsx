@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom';
-import Footer from './Footer';
+
 
 export default function AuthLayout() {
   return (
@@ -23,8 +23,6 @@ export default function AuthLayout() {
       <main className="flex-grow flex items-center justify-center px-6 py-20 relative overflow-hidden">
         <Outlet />
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import Footer from './Footer';
+
 import AtmosphericBackground from './AtmosphericBackground';
 import { useAtmosphericStyles } from '../../hooks/useAtmosphericStyles';
 
@@ -24,7 +24,6 @@ export default function DashboardLayout() {
         </button>
 
         <Outlet />
-        <Footer />
       </div>
     </AtmosphericBackground>
   );

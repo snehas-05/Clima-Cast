@@ -96,13 +96,6 @@ export default function About() {
               <p className="text-body-lg text-secondary-fixed/80 leading-relaxed">
                 Beyond commercial analytics, Clima-Cast is committed to environmental stewardship. We provide our advanced modeling tools to non-profit organizations fighting desertification and coastal erosion.
               </p>
-              <Button 
-                variant="ghost" 
-                className="mt-8 bg-white text-primary hover:bg-secondary-fixed border-none"
-                onClick={handlePartnerClick}
-              >
-                Partner with Us
-              </Button>
             </div>
             <div className="w-full md:w-1/3 aspect-video rounded-2xl overflow-hidden bg-surface-container/20 backdrop-blur-xl border border-white/20 p-1">
               <img

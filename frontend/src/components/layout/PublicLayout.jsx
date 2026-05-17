@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import Footer from './Footer';
+
 import Modal from '../ui/Modal';
 
 export default function PublicLayout() {
@@ -33,20 +33,20 @@ export default function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navigation */}
-      <header className="glass-topbar sticky top-0 z-50">
+      <header className="fixed top-0 w-full z-50 bg-slate-950/30 backdrop-blur-2xl border-b border-white/5 transition-colors duration-500 hover:bg-slate-950/50">
         <div className="flex justify-between items-center h-20 px-6 lg:px-[var(--spacing-container-padding)] max-w-[1440px] mx-auto">
           <div className="flex items-center gap-8">
-            <Link to="/" className="text-h3-card-title font-bold text-primary tracking-tight">
+            <Link to="/" className="text-h3-card-title font-light text-white tracking-widest drop-shadow-md">
               Clima-Cast
             </Link>
-            <nav className="hidden md:flex gap-6">
+            <nav className="hidden md:flex gap-8">
               <NavLink
                 to="/"
                 end
                 className={({ isActive }) =>
-                  `text-label-caps ${isActive
-                    ? 'text-primary font-bold border-b-2 border-primary pb-1'
-                    : 'text-on-surface-variant font-medium hover:text-primary transition-colors duration-200'
+                  `text-label-caps tracking-wider transition-all duration-300 ${isActive
+                    ? 'text-white font-medium drop-shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
                   }`
                 }
               >
@@ -55,9 +55,9 @@ export default function PublicLayout() {
               <NavLink
                 to="/about"
                 className={({ isActive }) =>
-                  `text-label-caps ${isActive
-                    ? 'text-primary font-bold border-b-2 border-primary pb-1'
-                    : 'text-on-surface-variant font-medium hover:text-primary transition-colors duration-200'
+                  `text-label-caps tracking-wider transition-all duration-300 ${isActive
+                    ? 'text-white font-medium drop-shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
                   }`
                 }
               >
@@ -65,24 +65,24 @@ export default function PublicLayout() {
               </NavLink>
             </nav>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => navigate('/login')}
-              className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+              className="material-symbols-outlined text-slate-500 hover:text-slate-300 transition-colors"
               title="Notifications (Login required)"
             >
               notifications
             </button>
             <button 
               onClick={() => navigate('/login')}
-              className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+              className="material-symbols-outlined text-slate-500 hover:text-slate-300 transition-colors"
               title="Profile (Login required)"
             >
               account_circle
             </button>
             <Link
               to="/login"
-              className="hidden md:block bg-primary text-on-primary px-6 py-2 rounded-full text-label-caps hover:opacity-90 active:scale-95 transition-all"
+              className="hidden md:block bg-slate-800/80 border border-slate-700/50 text-slate-200 px-6 py-2 rounded-full text-label-caps tracking-wider hover:bg-slate-700 hover:text-white transition-all duration-300 shadow-lg shadow-black/20"
             >
               Get Started
             </Link>
@@ -94,8 +94,6 @@ export default function PublicLayout() {
       <main className="flex-1">
         <Outlet context={{ openModal, handleContactSales }} />
       </main>
-
-      <Footer onLinkClick={(label) => openModal(label, <p className="text-body-lg text-on-surface-variant py-8">Information regarding <span className="text-primary font-bold">{label}</span> is currently being finalized for the 2026 deployment phase. Please contact our support team for immediate inquiries.</p>)} />
 
       <Modal 
         isOpen={modalConfig.isOpen} 
