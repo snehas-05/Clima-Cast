@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
   <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
 </p>
 
 ---
@@ -62,7 +62,7 @@ In an era of climate volatility, traditional weather apps often fail to provide 
 - **Account Recovery**: Token-based password reset flow integrated with an automated email recovery system.
 
 ### 🛠️ Production Engineering
-- **Robust Persistence**: MySQL 8.0 storage with SQLAlchemy ORM.
+- **Robust Persistence**: PostgreSQL storage with SQLAlchemy ORM.
 - **Hybrid Caching**: Multi-layer caching strategy to minimize API costs and latency.
 - **Fault Tolerance**: Automatic retry logic, 10s global timeouts, and React Error Boundaries.
 - **Security First**: Full environment variable isolation and sanitized SQL interactions.
@@ -78,7 +78,7 @@ graph TD
     User((User)) <--> Frontend[React SPA / Vite]
     Frontend <--> API[FastAPI Gateway]
     API <--> Cache[(Weather Cache Layer)]
-    API <--> DB[(MySQL 8.0)]
+    API <--> DB[(PostgreSQL)]
     API <--> ML[ML Inference Engine]
     ML --- Models[RF / XGBoost / Prophet]
     API <--> OpenWeather[[OpenWeather API]]
@@ -116,7 +116,7 @@ Every AI prediction includes a **Feature Importance** breakdown. Users can see e
 | :--- | :--- |
 | **Frontend** | React 18, Vite, Tailwind CSS, Recharts, Axios, Context API |
 | **Backend** | FastAPI, SQLAlchemy, Uvicorn, Python 3.10+ |
-| **Database** | MySQL 8.0 |
+| **Database** | PostgreSQL |
 | **Data Science** | Pandas, Scikit-Learn, XGBoost, Prophet, SHAP, Joblib |
 | **DevOps** | Git LFS, Vercel (FE), Railway (BE/DB) |
 
@@ -179,6 +179,9 @@ pip install -r requirements.txt
 # Linux/Mac: cp .env.example .env
 # Windows: copy .env.example .env
 
+# Create the PostgreSQL database once before starting the API
+createdb climacast
+
 uvicorn app.main:app --reload
 ```
 
@@ -215,7 +218,7 @@ To retrain models, place the following datasets in `backend/app/data/`:
 ### Backend (`backend/.env`)
 ```env
 # Database Configuration
-DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/clima_cast
+DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/climacast
 
 # External APIs
 OPENWEATHER_API_KEY=your_key_here
@@ -239,7 +242,7 @@ VITE_API_URL=http://localhost:8000
 | Issue | Solution |
 | :--- | :--- |
 | **Model Load Error** | Ensure `git lfs pull` was executed and files exist in `models_saved/`. |
-| **DB Connection Fail** | Verify MySQL service is running and `DATABASE_URL` matches your local config. |
+| **DB Connection Fail** | Verify PostgreSQL is running, the target database exists, and `DATABASE_URL` matches your local config. |
 | **CORS Errors** | Check that `BACKEND_CORS_ORIGINS` in `main.py` includes your frontend URL. |
 | **Missing Packages** | Run `pip install -r requirements.txt` within your virtual environment. |
 

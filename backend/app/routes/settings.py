@@ -21,7 +21,7 @@ async def get_preferences(
     user: User = Depends(get_current_user)
 ):
     """
-    Load user's preferences from MySQL.
+    Load user's preferences from the database.
     """
     prefs = db.query(UserPreference).filter(UserPreference.user_id == user.id).first()
     
@@ -48,7 +48,7 @@ async def update_preferences(
     user: User = Depends(get_current_user)
 ):
     """
-    Save theme, unit, and show_confidence to MySQL preferences table.
+    Save theme, unit, and show_confidence to the preferences table.
     """
     prefs = db.query(UserPreference).filter(UserPreference.user_id == user.id).first()
     
