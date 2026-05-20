@@ -29,13 +29,13 @@ export const useAtmosphericStyles = () => {
     }
 
     // 2. Accent & Glow Colors
-    let accentGlow = 'rgba(192, 132, 252, 0.3)'; // Default purple
+    let accentGlow = theme === 'dark' ? 'rgba(56, 189, 248, 0.12)' : 'rgba(14, 165, 233, 0.14)';
     if (mood === 'intense') {
-      accentGlow = theme === 'dark' ? 'rgba(248, 113, 113, 0.4)' : 'rgba(239, 68, 68, 0.2)'; // Reddish
+      accentGlow = theme === 'dark' ? 'rgba(248, 113, 113, 0.18)' : 'rgba(239, 68, 68, 0.14)';
     } else if (solarPhase === 'dawn' || solarPhase === 'dusk') {
-      accentGlow = 'rgba(251, 146, 60, 0.3)'; // Orange/Gold
+      accentGlow = theme === 'dark' ? 'rgba(251, 191, 36, 0.14)' : 'rgba(251, 146, 60, 0.14)';
     } else if (!isDay) {
-      accentGlow = 'rgba(129, 140, 248, 0.3)'; // Indigo/Night
+      accentGlow = theme === 'dark' ? 'rgba(129, 140, 248, 0.14)' : 'rgba(99, 102, 241, 0.12)';
     }
 
     // 3. Inject Variables

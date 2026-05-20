@@ -64,31 +64,27 @@ export default function Sidebar({ isOpen, onClose }) {
           }
         }}
         transition={{ duration: TIMING.MEDIUM, ease: EASING.CINEMATIC }}
-        className={`fixed left-0 top-0 h-full w-[280px] glass-sidebar flex flex-col py-8 px-6 gap-y-4 z-50
-          lg:translate-x-0 dark:bg-[#030712]/95 dark:border-r dark:border-white/5 shadow-2xl transition-colors duration-1000`}
-        style={{
-          '--accent-glow': 'var(--atmospheric-glow, rgba(var(--primary-rgb), 0.05))',
-          background: 'linear-gradient(to bottom, var(--accent-glow) 0%, transparent 100%)'
-        }}
+        className={`fixed left-0 top-0 h-full w-[280px] glass-sidebar flex flex-col py-6 px-4 gap-y-2 z-50
+          lg:translate-x-0 dark:border-r dark:border-white/5 transition-colors duration-1000`}
         aria-label="Main Navigation Sidebar"
       >
         {/* Brand */}
         <div className="mb-8 px-2 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/15 shrink-0">
             <span className="material-symbols-outlined text-primary text-2xl">cloud</span>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-on-surface tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-on-surface tracking-tight truncate">
               Clima-Cast
             </h1>
-            <p className="text-[10px] font-bold text-primary/70 tracking-[0.2em] uppercase">
+            <p className="text-[10px] font-bold text-primary/70 tracking-[0.2em] uppercase truncate">
               Intelligence Hub
             </p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1.5 overflow-y-auto no-scrollbar" aria-label="Primary Navigation">
+        <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar" aria-label="Primary Navigation">
           {navItems.map(({ to, icon, label }) => (
             <NavLink
               key={to}
@@ -96,9 +92,9 @@ export default function Sidebar({ isOpen, onClose }) {
               onClick={onClose}
               aria-label={`Navigate to ${label}`}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group
+                `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-300 group touch-target
                 ${isActive
-                   ? 'bg-primary/10 text-primary font-bold border border-primary/20 shadow-inner shadow-primary/10'
+                   ? 'bg-white/[0.06] text-primary font-semibold border border-primary/10'
                    : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
                 }`
               }
@@ -106,7 +102,7 @@ export default function Sidebar({ isOpen, onClose }) {
               {({ isActive }) => (
                 <>
                   <span
-                    className={`material-symbols-outlined transition-all duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110 group-hover:text-primary'}`}
+                    className={`material-symbols-outlined text-[22px] transition-all duration-300 shrink-0 ${isActive ? 'scale-105' : 'group-hover:scale-105 group-hover:text-primary'}`}
                     aria-hidden="true"
                     style={
                       isActive
@@ -116,11 +112,11 @@ export default function Sidebar({ isOpen, onClose }) {
                   >
                     {icon}
                   </span>
-                  <span className="text-sm tracking-wide">{label}</span>
+                  <span className="text-[13px] tracking-wide font-medium truncate">{label}</span>
                   {isActive && (
                     <motion.div 
                       layoutId="sidebar-active-indicator"
-                      className="ml-auto w-1 h-4 rounded-full bg-primary shadow-[0_0_12px_rgba(192,132,252,0.8)]" 
+                      className="ml-auto w-[3px] h-4 rounded-full bg-primary shrink-0" 
                     />
                   )}
                 </>
@@ -130,20 +126,20 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="mt-auto border-t border-white/5 pt-6 space-y-1">
+        <div className="mt-auto border-t border-white/5 pt-4 space-y-1">
           {bottomItems.map(({ icon, label, action }) => (
             <button
               key={action}
               onClick={() => handleAction(action)}
               aria-label={label}
-              className={`w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group
+              className={`w-full text-left flex items-center gap-3 px-3 py-3 rounded-lg transition-all touch-target group
                 ${action === 'logout'
                    ? 'text-on-surface-variant hover:bg-error/10 hover:text-error'
                    : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
                 }`}
             >
-              <span className="material-symbols-outlined transition-transform group-hover:scale-110" aria-hidden="true">{icon}</span>
-              <span className="text-sm font-medium">{label}</span>
+              <span className="material-symbols-outlined transition-transform group-hover:scale-110 shrink-0" aria-hidden="true">{icon}</span>
+              <span className="text-sm font-medium truncate">{label}</span>
             </button>
           ))}
         </div>

@@ -65,16 +65,16 @@ export default function Forecast() {
       return (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-3xl bg-primary/5 border border-primary/10 text-center">
+            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 text-center">
               <p className="text-label-caps text-on-surface-variant mb-1">High</p>
               <p className="text-3xl font-bold text-primary">{formatTemp(data.high, unit)}°</p>
             </div>
-            <div className="p-4 rounded-3xl bg-secondary/5 border border-secondary/10 text-center">
+            <div className="p-4 rounded-2xl bg-secondary/5 border border-secondary/10 text-center">
               <p className="text-label-caps text-on-surface-variant mb-1">Low</p>
               <p className="text-3xl font-bold text-secondary">{formatTemp(data.low, unit)}°</p>
             </div>
           </div>
-          <div className="glass-card p-6 rounded-3xl">
+          <div className="bg-white/[0.03] border border-white/5 p-5 rounded-2xl">
              <p className="text-body-main text-on-surface-variant mb-4">
                {data.description}. The day will see a high of {formatTemp(data.high, unit)}° and a low of {formatTemp(data.low, unit)}°.
              </p>
@@ -96,17 +96,17 @@ export default function Forecast() {
     if (type === 'hourly') {
       return (
         <div className="space-y-6 text-center">
-          <div className="p-10 glass-card rounded-[2.5rem] inline-block mx-auto border-primary/20">
+          <div className="p-6 bg-white/[0.03] border border-primary/20 rounded-2xl inline-block mx-auto">
             <p className="text-label-caps text-on-surface-variant mb-2">{data.time}</p>
             <p className="text-h1-hero text-on-surface">{formatTemp(data.temp, unit)}°</p>
             <p className="text-h3-card-title text-primary mt-2 uppercase tracking-widest">{data.condition}</p>
           </div>
           <div className="grid grid-cols-2 gap-4 text-left">
-             <div className="p-4 glass-card rounded-2xl">
+             <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
                 <p className="text-[10px] text-label-caps text-on-surface-variant/60 font-bold">WIND</p>
                 <p className="text-lg font-bold text-on-surface">{data.wind_kph || '--'} km/h</p>
              </div>
-             <div className="p-4 glass-card rounded-2xl">
+             <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
                 <p className="text-[10px] text-label-caps text-on-surface-variant/60 font-bold">CHANCE OF RAIN</p>
                 <p className="text-lg font-bold text-on-surface">{data.precip_mm || '0'} mm</p>
              </div>
@@ -124,16 +124,16 @@ export default function Forecast() {
               <p className="text-on-surface-variant">{data.date}</p>
            </div>
            <div className="grid grid-cols-2 gap-4">
-              <div className="p-6 glass-card rounded-3xl text-center bg-gradient-to-br from-primary/5 to-transparent">
+              <div className="p-5 bg-white/[0.03] border border-white/5 rounded-2xl text-center bg-gradient-to-br from-primary/5 to-transparent">
                  <p className="text-label-caps text-on-surface-variant mb-2">High</p>
                  <p className="text-4xl font-bold text-on-surface">{formatTemp(data.max_temp, unit)}°</p>
               </div>
-              <div className="p-6 glass-card rounded-3xl text-center bg-gradient-to-br from-slate-800/10 to-transparent">
+              <div className="p-5 bg-white/[0.03] border border-white/5 rounded-2xl text-center bg-gradient-to-br from-slate-800/10 to-transparent">
                  <p className="text-label-caps text-on-surface-variant mb-2">Low</p>
                  <p className="text-4xl font-bold text-on-surface">{formatTemp(data.min_temp, unit)}°</p>
               </div>
            </div>
-           <div className="p-6 glass-card rounded-3xl">
+           <div className="p-5 bg-white/[0.03] border border-white/5 rounded-2xl">
               <h5 className="font-bold text-primary mb-3">Daily Summary</h5>
               <p className="text-on-surface-variant leading-relaxed">
                  Expect {data.condition.toLowerCase()} conditions throughout the day. 
@@ -153,7 +153,7 @@ export default function Forecast() {
     <div className={`min-h-screen transition-colors duration-1000 ${getBackgroundClass()}`}>
       <TopBar title="Forecast" subtitle="Atmospheric Outlook" />
 
-      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-8">
+      <div className="dashboard-shell dashboard-stack">
 
         {/* Today Summary Hero */}
         {forecastLoading && !memoizedForecast ? (
@@ -177,7 +177,7 @@ export default function Forecast() {
         )}
 
         {/* Divider */}
-        <div className="flex items-center gap-6 py-6">
+        <div className="section-divider">
           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <span className="text-label-caps text-primary/60 tracking-[0.4em] font-bold">7-Day Forecast</span>
           <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-white/10 to-transparent" />
@@ -187,7 +187,7 @@ export default function Forecast() {
         {forecastLoading && !memoizedForecast ? (
           <DailyGridSkeleton />
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-5">
             {memoizedForecast?.daily?.map((day) => (
               <DayForecastCard 
                 key={day.date} 

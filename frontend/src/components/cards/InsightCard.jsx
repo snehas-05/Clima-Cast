@@ -73,7 +73,7 @@ export default function InsightCard({
         <div className="flex items-center gap-2 mb-2">
           <p className={`font-bold text-sm tracking-wide uppercase ${severityStyles.title}`}>{title}</p>
           {trend !== 'stable' && (
-            <span className={`material-symbols-outlined text-sm ${trend === 'worsening' ? 'text-rose-400 rotate-45' : 'text-emerald-400 -rotate-45'}`}>
+            <span className={`material-symbols-outlined text-sm ${trend === 'worsening' ? 'text-rose-400 rotate-45' : 'text-cyan-300 -rotate-45'}`}>
               north_east
             </span>
           )}

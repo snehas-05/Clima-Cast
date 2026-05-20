@@ -45,9 +45,9 @@ export const TRANSITIONS = {
 export const HOVER = {
   DEPTH: {
     whileHover: { 
-      y: -4,
-      boxShadow: '0 20px 40px -15px rgba(192, 132, 252, 0.15)',
-      borderColor: 'rgba(192, 132, 252, 0.4)'
+      y: -2,
+      boxShadow: '0 22px 44px -24px rgba(0, 0, 0, 0.75)',
+      borderColor: 'rgba(56, 189, 248, 0.18)'
     },
     transition: { duration: TIMING.FAST, ease: EASING.SOFT }
   },

@@ -27,7 +27,7 @@ export default function AnimatedCard({
         }
       }}
       {...(!noHover && onClick ? HOVER.DEPTH : {})}
-      className={`glass-card rounded-[2rem] p-6 border border-white/5 relative overflow-hidden transition-colors ${className} ${onClick ? 'cursor-pointer' : ''}`}
+      className={`glass-card rounded-[1.75rem] border border-white/5 relative overflow-hidden transition-colors ${className || 'card-pad'} ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
       {...props}
     >

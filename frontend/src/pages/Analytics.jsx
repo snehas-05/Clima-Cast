@@ -122,12 +122,12 @@ export default function Analytics() {
         variants={containerVariants}
         initial="initial"
         animate="animate"
-        className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-8"
+        className="dashboard-shell dashboard-stack"
       >
         
         {/* Intelligence Context Header */}
         <AnimatedCard 
-          className="p-8 border-white/5 bg-gradient-to-br from-primary/10 via-transparent to-transparent"
+          className="card-pad-lg border-white/5 bg-gradient-to-br from-primary/10 via-transparent to-transparent"
           noHover
           delay={0.1}
         >
@@ -135,7 +135,7 @@ export default function Analytics() {
               <div>
                   <div className="flex items-center gap-3 mb-1">
                     <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Intelligence Context</span>
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(56,189,248,0.35)]" />
                   </div>
                   <h2 className="text-4xl font-black text-on-surface tracking-tighter">
                     {activeCity} <span className="text-on-surface-variant/40 font-light">Regional Model</span>
@@ -150,7 +150,7 @@ export default function Analytics() {
         </AnimatedCard>
 
         {/* Metrics Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="metric-grid grid-cols-2 lg:grid-cols-4">
           {loading && !data.history.length ? (
             <>
               <MetricCard loading={true} />
@@ -182,7 +182,7 @@ export default function Analytics() {
         </motion.div>
 
         {/* Side-by-Side: Humidity + Rainfall */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[var(--spacing-card-gap)]">
             <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}

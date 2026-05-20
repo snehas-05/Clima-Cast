@@ -28,7 +28,7 @@ const heroStats = [
 const PredictionCard = ({ title, icon, value, subValue, explanation, loading, trend, colorClass = "text-primary", delay = 0 }) => (
   <AnimatedCard 
     delay={delay}
-    className="p-7 space-y-5 border-white/10"
+    className="card-pad space-y-4 border-white/10"
   >
     <div className="flex items-center justify-between relative z-10">
       <div className="flex items-center gap-3">
@@ -38,7 +38,7 @@ const PredictionCard = ({ title, icon, value, subValue, explanation, loading, tr
         <p className="text-label-caps text-on-surface-variant tracking-widest">{title}</p>
       </div>
       {trend && (
-        <span className={`material-symbols-outlined ${trend === 'up' ? 'text-error' : trend === 'down' ? 'text-success' : 'text-on-surface-variant'}`}>
+        <span className={`material-symbols-outlined ${trend === 'up' ? 'text-error' : trend === 'down' ? 'text-cyan-300' : 'text-on-surface-variant'}`}>
           {trend === 'up' ? 'north' : trend === 'down' ? 'south' : 'east'}
         </span>
       )}
@@ -197,7 +197,7 @@ export default function AIPredictions() {
         variants={containerVariants}
         initial="initial"
         animate="animate"
-        className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)]"
+        className="dashboard-shell dashboard-stack"
       >
         
         {/* City Search & Last Updated */}
@@ -268,7 +268,7 @@ export default function AIPredictions() {
 
         {/* Hero Card */}
         <AnimatedCard 
-          className="p-8 border-white/5"
+          className="card-pad-lg border-white/5"
           noHover
           delay={0.2}
         >
@@ -291,8 +291,8 @@ export default function AIPredictions() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="bg-white/5 rounded-[1.5rem] p-6 border border-white/10 hover:border-primary/30 transition-all group">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mt-8">
+              <div className="bg-white/5 rounded-2xl card-pad border border-white/10 hover:border-primary/30 transition-all group">
                 <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-widest mb-2">MODEL CONFIDENCE</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-h2-dashboard text-primary">
@@ -301,12 +301,12 @@ export default function AIPredictions() {
                 </div>
                 <p className="text-sm text-on-surface-variant mt-1">Weighted accuracy mesh</p>
               </div>
-              <div className="bg-white/5 rounded-[1.5rem] p-6 border border-white/10 hover:border-primary/30 transition-all group">
+              <div className="bg-white/5 rounded-2xl card-pad border border-white/10 hover:border-primary/30 transition-all group">
                 <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-widest mb-2">DATA POINTS</p>
                 <p className="text-h2-dashboard text-primary">4.2PB</p>
                 <p className="text-sm text-on-surface-variant mt-1">Processed history & real-time</p>
               </div>
-              <div className="bg-white/5 rounded-[1.5rem] p-6 border border-white/10 hover:border-primary/30 transition-all group">
+              <div className="bg-white/5 rounded-2xl card-pad border border-white/10 hover:border-primary/30 transition-all group">
                 <p className="text-[10px] font-black text-on-surface-variant/40 group-hover:text-primary transition-colors tracking-widest mb-2">LATENCY</p>
                 <p className="text-h2-dashboard text-primary">124ms</p>
                 <p className="text-sm text-on-surface-variant mt-1">Edge inference speed</p>
@@ -316,7 +316,7 @@ export default function AIPredictions() {
         </AnimatedCard>
 
         {/* Prediction Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[var(--spacing-card-gap)]">
+        <div className="metric-grid grid-cols-2 lg:grid-cols-4">
           <PredictionCard 
             title="RAIN PROBABILITY"
             icon="water_drop"
@@ -357,12 +357,12 @@ export default function AIPredictions() {
             subValue={isMLAvailable ? `${Math.round((predictions.alerts?.prediction?.probability || 0) * 100)}% Confidence` : "Live Verification"}
             explanation={predictions.alerts?.explanation}
             loading={loading}
-            colorClass={isMLAvailable && predictions.alerts?.prediction?.alert_type !== 'normal' ? 'text-error' : 'text-success'}
+            colorClass={isMLAvailable && predictions.alerts?.prediction?.alert_type !== 'normal' ? 'text-error' : 'text-cyan-400'}
             delay={0.6}
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--spacing-card-gap)]">
+        <div className="panel-grid">
           {/* Trend Chart */}
           <div className="lg:col-span-8">
             <ChartContainer title="7-Day AI Climate Trend" subtitle="Neural mesh predicted temperature movement">
@@ -379,7 +379,7 @@ export default function AIPredictions() {
           </div>
 
           {/* Training Metrics */}
-          <div className="lg:col-span-4 glass-card rounded-3xl p-8">
+          <div className="lg:col-span-4 glass-card rounded-2xl p-5 md:p-6">
             <h4 className="text-h3-card-title text-on-surface mb-6">Model Integrity</h4>
             <div className="space-y-4">
               <MetricItem label="Rain F1-Score" value={(predictions.metrics?.rain?.f1 || 0.88).toFixed(2)} icon="verified" />

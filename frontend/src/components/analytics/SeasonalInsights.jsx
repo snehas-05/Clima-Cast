@@ -18,18 +18,18 @@ export default function SeasonalInsights({ data, loading }) {
 
   const getSeasonColor = (season) => {
     switch (season.toLowerCase()) {
-      case 'summer': return 'text-amber-500 bg-amber-50';
-      case 'winter': return 'text-blue-500 bg-blue-50';
-      case 'spring': return 'text-green-500 bg-green-50';
-      case 'autumn': return 'text-orange-500 bg-orange-50';
-      default: return 'text-gray-500 bg-gray-50';
+      case 'summer': return 'text-amber-300 bg-amber-400/10 border border-amber-400/10';
+      case 'winter': return 'text-cyan-300 bg-cyan-400/10 border border-cyan-400/10';
+      case 'spring': return 'text-indigo-300 bg-indigo-400/10 border border-indigo-400/10';
+      case 'autumn': return 'text-amber-400 bg-amber-500/10 border border-amber-500/10';
+      default: return 'text-slate-300 bg-white/5 border border-white/10';
     }
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {data.map((s) => (
-        <div key={s.season} className="glass-card p-6 rounded-3xl border border-white/40 hover:shadow-xl transition-all group">
+        <div key={s.season} className="glass-card p-6 rounded-3xl border border-white/5 transition-all group">
           <div className="flex justify-between items-start mb-4">
             <div className={`p-3 rounded-2xl ${getSeasonColor(s.season)}`}>
               <span className="material-symbols-outlined">{SeasonIcon(s.season)}</span>

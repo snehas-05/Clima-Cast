@@ -66,7 +66,7 @@ export default function SavedCities() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 glass-topbar h-20 px-6 lg:px-[var(--spacing-container-padding)] flex justify-between items-center">
+      <header className="sticky top-0 z-40 glass-topbar h-20 px-[var(--spacing-container-px)] flex justify-between items-center">
         <form onSubmit={handleAddCity} className="flex items-center flex-1 max-w-2xl">
           <div className="relative w-full group">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">
@@ -103,7 +103,7 @@ export default function SavedCities() {
         </div>
       </header>
 
-      <section className="p-6 lg:p-[var(--spacing-container-padding)] flex-1 max-w-[1440px] mx-auto w-full">
+      <div className="dashboard-shell dashboard-stack">
         <div className="flex justify-between items-end mb-8">
           <div>
             <h2 className="text-h2-dashboard text-on-surface">Saved Cities</h2>
@@ -128,7 +128,7 @@ export default function SavedCities() {
         </div>
 
         <div className={viewMode === 'grid' 
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-card-gap)]"
+          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           : "flex flex-col gap-4"
         }>
           {loading ? (
@@ -136,13 +136,13 @@ export default function SavedCities() {
           ) : (
             <>
               {favorites.length === 0 ? (
-                <div className="md:col-span-2 lg:col-span-3 glass-card rounded-3xl p-16 flex flex-col items-center text-center space-y-6">
-                  <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-6xl text-primary opacity-20">location_off</span>
+                <div className="md:col-span-2 lg:col-span-3 glass-card rounded-2xl p-12 flex flex-col items-center text-center space-y-6">
+                  <div className="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-5xl text-primary opacity-20">location_off</span>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-bold text-on-surface">No cities saved yet</h3>
-                    <p className="text-on-surface-variant max-w-md mx-auto">
+                    <h3 className="text-xl font-bold text-on-surface">No cities saved yet</h3>
+                    <p className="text-body-main text-on-surface-variant max-w-md mx-auto">
                       Search and add your first city to start monitoring atmospheric conditions and AI-powered predictions.
                     </p>
                   </div>
@@ -166,7 +166,7 @@ export default function SavedCities() {
 
               <div 
                 onClick={() => document.querySelector('input').focus()}
-                className={`glass-card bg-white/40 border-dashed border-2 border-outline-variant/50 rounded-3xl p-6 flex flex-col items-center justify-center hover:border-primary/50 cursor-pointer group transition-all
+                className={`glass-card bg-white/40 border-dashed border-2 border-outline-variant/50 rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center hover:border-primary/50 cursor-pointer group transition-all
                   ${viewMode === 'list' ? 'h-24 flex-row gap-4' : 'min-h-[220px]'}`}
               >
                 <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
@@ -204,7 +204,7 @@ export default function SavedCities() {
 
         {/* Climate Mission Insights */}
         {showSummary && (
-          <div className="mt-12 glass-card rounded-3xl p-8 overflow-hidden relative">
+          <div className="mt-12 glass-card rounded-2xl p-6 md:p-8 overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
               <div className="max-w-xl">
@@ -233,7 +233,7 @@ export default function SavedCities() {
             </div>
           </div>
         )}
-      </section>
+      </div>
     </>
   );
 }

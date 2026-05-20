@@ -43,7 +43,7 @@ export default function Alerts() {
   return (
     <>
       <TopBar title="Alerts Intelligence" subtitle={weatherData?.city || "Global Feed"} />
-      <div className="flex-1 px-6 lg:px-[var(--spacing-container-padding)] py-8 max-w-[1440px] mx-auto w-full space-y-[var(--spacing-card-gap)] animate-fade-in">
+      <div className="dashboard-shell dashboard-stack animate-fade-in">
         
         {/* Stats Row */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-[var(--spacing-card-gap)]">
@@ -68,7 +68,7 @@ export default function Alerts() {
         </section>
 
         {/* Main Grid */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--spacing-card-gap)]">
+        <section className="panel-grid">
           
           <div className="lg:col-span-8 flex flex-col gap-[var(--spacing-card-gap)]">
             {/* Risk Map (Static Demo) */}

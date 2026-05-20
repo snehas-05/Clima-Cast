@@ -75,9 +75,9 @@ export default function TopBar({ title, subtitle, children }) {
 
   return (
     <header className="sticky top-0 z-40 glass-topbar">
-      <div className="flex justify-between items-center h-20 px-6 lg:px-[var(--spacing-container-padding)] max-w-[1440px] mx-auto w-full">
+      <div className="flex justify-between items-center h-[var(--spacing-topbar-height)] px-[var(--spacing-container-px)] max-w-[1440px] mx-auto w-full">
         {/* Left: Title + optional subtitle */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-var(--spacing-xl)">
           <div>
             <h2 className="text-h2-dashboard text-primary truncate max-w-[200px] sm:max-w-none">{title}</h2>
             <p className="text-label-caps text-on-surface-variant/60 text-[10px] sm:text-xs">
@@ -87,7 +87,7 @@ export default function TopBar({ title, subtitle, children }) {
         </div>
 
         {/* Right: Search + actions */}
-        <div className="flex items-center gap-4 relative">
+        <div className="flex items-center gap-var(--spacing-md) relative">
           {/* Unit Toggle */}
           <div className="hidden lg:block">
             <UnitToggle />
@@ -97,13 +97,13 @@ export default function TopBar({ title, subtitle, children }) {
           <ThemeToggle />
 
           {/* City Selector */}
-          <div className="hidden md:block flex-1 max-w-xs mx-4">
+          <div className="hidden md:block flex-1 max-w-xs mx-var(--spacing-lg)">
             <CitySearch />
           </div>
 
           {/* AI Question Search */}
           <div className="relative group hidden xl:block" ref={searchRef}>
-            <span className="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary" aria-hidden="true">
+            <span className="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary touch-target" aria-hidden="true">
               <span className="material-symbols-outlined">psychology</span>
             </span>
             <input
@@ -139,14 +139,14 @@ export default function TopBar({ title, subtitle, children }) {
             />
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-80 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="px-4 py-3 border-b border-outline-variant/30 bg-surface-container-low flex justify-between items-center">
+                <div className="px-var(--spacing-lg) py-var(--spacing-md) border-b border-outline-variant/30 bg-surface-container-low flex justify-between items-center">
                   <h3 className="text-body-main font-bold text-on-surface">Notifications</h3>
                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">3 NEW</span>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.map(n => (
-                    <div key={n.id} className="px-4 py-3 hover:bg-surface-container transition-colors cursor-pointer border-b border-outline-variant/10 last:border-0 flex gap-3">
-                      <span className="material-symbols-outlined text-primary text-xl">{n.icon}</span>
+                    <div key={n.id} className="px-var(--spacing-lg) py-var(--spacing-md) hover:bg-surface-container transition-colors cursor-pointer border-b border-outline-variant/10 last:border-0 flex gap-3">
+                      <span className="material-symbols-outlined text-primary text-xl shrink-0">{n.icon}</span>
                       <div>
                         <p className="text-body-sm text-on-surface line-clamp-2">{n.text}</p>
                         <p className="text-[10px] text-on-surface-variant mt-1">{n.time}</p>
@@ -161,12 +161,12 @@ export default function TopBar({ title, subtitle, children }) {
             )}
           </div>
 
-          <div className="h-8 w-px bg-outline-variant/30 mx-1 hidden sm:block" />
+          <div className="h-8 w-px bg-outline-variant/30 mx-var(--spacing-md) hidden sm:block" />
 
           {/* User avatar area */}
           <div className="relative">
             <button 
-              className="flex items-center gap-3 cursor-pointer group focus:outline-none"
+              className="flex items-center gap-var(--spacing-md) cursor-pointer group focus:outline-none touch-target"
               onClick={() => {
                 setShowDropdown(!showDropdown);
                 setShowNotifications(false);
@@ -178,7 +178,7 @@ export default function TopBar({ title, subtitle, children }) {
               <div className="hidden sm:block text-right">
                 <p className="text-body-main font-semibold text-on-surface">{user?.name || 'User'}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border-2 border-primary/20 group-hover:border-primary group-focus:border-primary transition-all">
+              <div className="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border-2 border-primary/20 group-hover:border-primary group-focus:border-primary transition-all shrink-0">
                 <div className="w-full h-full bg-primary-container flex items-center justify-center text-on-primary-container">
                   <span className="material-symbols-outlined" aria-hidden="true">person</span>
                 </div>
@@ -187,16 +187,16 @@ export default function TopBar({ title, subtitle, children }) {
 
             {showDropdown && (
               <div 
-                className="absolute right-0 mt-2 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute right-0 mt-var(--spacing-md) w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
                 role="menu"
                 aria-orientation="vertical"
               >
-                <div className="px-4 py-2 border-b border-outline-variant/30 sm:hidden" role="none">
+                <div className="px-var(--spacing-lg) py-var(--spacing-md) border-b border-outline-variant/30 sm:hidden" role="none">
                   <p className="text-body-main font-semibold text-on-surface" role="none">{user?.name}</p>
                   <p className="text-label-caps text-on-surface-variant truncate" role="none">{user?.email}</p>
                 </div>
                 <button 
-                  className="w-full text-left px-4 py-2 text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors"
+                  className="w-full text-left px-var(--spacing-lg) py-var(--spacing-md) text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors touch-target"
                   onClick={() => {
                     alert("Navigating to Profile...");
                     setShowDropdown(false);
@@ -206,7 +206,7 @@ export default function TopBar({ title, subtitle, children }) {
                   Profile
                 </button>
                 <button 
-                  className="w-full text-left px-4 py-2 text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors"
+                  className="w-full text-left px-var(--spacing-lg) py-var(--spacing-md) text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors touch-target"
                   onClick={() => {
                     alert("Opening Security Settings...");
                     setShowDropdown(false);
@@ -215,11 +215,11 @@ export default function TopBar({ title, subtitle, children }) {
                   <span className="material-symbols-outlined text-[18px]">security</span>
                   Security
                 </button>
-                <div className="h-px bg-outline-variant/30 my-1" />
+                <div className="h-px bg-outline-variant/30 my-var(--spacing-sm)" />
                 <button 
                   onClick={logout}
                   role="menuitem"
-                  className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                  className="w-full text-left px-var(--spacing-lg) py-var(--spacing-md) text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors touch-target"
                 >
                   <span className="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
                   Logout
