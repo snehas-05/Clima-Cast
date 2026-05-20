@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from typing import Any
 
 from app.database.connection import get_db
@@ -13,6 +14,12 @@ from app.services.mail_service import mail_service
 from datetime import timedelta
 
 router = APIRouter()
+
+DATABASE_ERROR_RESPONSE = StandardResponse(
+    success=False,
+    message="Database connection failed",
+    error="Could not connect to the database. Make sure PostgreSQL is running and DATABASE_URL is correct."
+)
 
 @router.post("/signup", response_model=StandardResponse)
 def signup(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
@@ -59,8 +66,13 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
                 "user": UserResponse.model_validate(new_user).model_dump()
             }
         )
+    except SQLAlchemyError as e:
+        db.rollback()
+        print(f"Signup database error: {e}")
+        return DATABASE_ERROR_RESPONSE
     except Exception as e:
         db.rollback()
+        print(f"Signup error: {e}")
         return StandardResponse(
             success=False,
             message="An error occurred during signup",
@@ -89,6 +101,9 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)) -> Any:
                 "user": UserResponse.model_validate(user).model_dump()
             }
         )
+    except SQLAlchemyError as e:
+        print(f"Login database error: {e}")
+        return DATABASE_ERROR_RESPONSE
     except Exception as e:
         print(f"Login error: {e}")
         return StandardResponse(

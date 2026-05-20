@@ -1,9 +1,8 @@
 import os
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
-from dotenv import load_dotenv
 
-load_dotenv()
+import app.config  # noqa: F401
 
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

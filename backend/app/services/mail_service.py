@@ -1,9 +1,8 @@
 import os
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
-from dotenv import load_dotenv
 
-load_dotenv()
+import app.config  # noqa: F401
 
 class MailService:
     def __init__(self):

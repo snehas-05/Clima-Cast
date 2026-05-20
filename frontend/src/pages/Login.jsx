@@ -16,6 +16,13 @@ export default function Login() {
   const { login, forgotPassword } = useAuth();
   const navigate = useNavigate();
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err.response?.data;
+    if (typeof data?.detail === 'string') return data.detail;
+    if (Array.isArray(data?.detail)) return data.detail[0]?.msg || fallback;
+    return data?.error || data?.message || fallback;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -30,7 +37,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error("Login component error:", err);
-      setError(err.response?.data?.error || err.response?.data?.message || 'An error occurred during login');
+      setError(getErrorMessage(err, 'An error occurred during login'));
     } finally {
       setIsSubmitting(false);
     }

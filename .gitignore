@@ -23,3 +23,5 @@ node_modules/
 # Project specific
 backend/.env
 frontend/.env
+backend/*.db
+backend/*.db-*

@@ -11,6 +11,13 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+  const getErrorMessage = (err, fallback) => {
+    const data = err.response?.data;
+    if (typeof data?.detail === 'string') return data.detail;
+    if (Array.isArray(data?.detail)) return data.detail[0]?.msg || fallback;
+    return data?.error || data?.message || fallback;
+  };
   
   const validatePassword = (pass) => {
     if (pass.length < 8) return "Password must be at least 8 characters long";
@@ -48,7 +55,7 @@ export default function Signup() {
         setError(res.error || res.message || 'Signup failed');
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || err.response?.data?.detail?.[0]?.msg || 'An error occurred during signup');
+      setError(getErrorMessage(err, 'An error occurred during signup'));
     } finally {
       setIsSubmitting(false);
     }

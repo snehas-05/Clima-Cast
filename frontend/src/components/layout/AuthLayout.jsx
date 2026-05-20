@@ -3,7 +3,7 @@ import { Link, Outlet } from 'react-router-dom';
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen flex flex-col atmospheric-bg">
+    <div className="auth-shell min-h-screen flex flex-col atmospheric-bg">
       {/* Minimal Header */}
       <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-6 lg:px-[var(--spacing-container-padding)] max-w-[1440px] mx-auto w-full">
         <Link to="/" className="text-h3-card-title font-bold text-primary tracking-tight">

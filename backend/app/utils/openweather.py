@@ -2,9 +2,8 @@ import httpx
 import logging
 from typing import Dict, Any, Optional
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+import app.config  # noqa: F401
 
 logger = logging.getLogger("uvicorn.error")
 
