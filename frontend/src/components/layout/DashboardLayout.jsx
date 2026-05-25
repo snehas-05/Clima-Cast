@@ -14,7 +14,7 @@ export default function DashboardLayout() {
     <AtmosphericBackground>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="lg:ml-[280px] min-h-screen flex flex-col main-content-responsive">
+      <div className="main-content-responsive min-h-screen flex flex-col flex-1 w-full min-w-0">
         {/* Mobile menu button */}
         <button
           className="lg:hidden fixed top-4 left-4 z-50 p-2 glass-card rounded-xl"

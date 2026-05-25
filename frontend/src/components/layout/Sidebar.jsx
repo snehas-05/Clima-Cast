@@ -94,7 +94,7 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-300 group touch-target
                 ${isActive
-                   ? 'bg-white/[0.06] text-primary font-semibold border border-primary/10'
+                   ? 'bg-slate-100/80 dark:bg-white/[0.06] text-primary font-semibold border border-primary/10'
                    : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
                 }`
               }

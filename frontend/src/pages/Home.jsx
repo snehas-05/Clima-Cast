@@ -434,10 +434,10 @@ export default function Home() {
   };
 
   return (
-    <div className="mesh-gradient">
-      <main className="max-w-[1440px] mx-auto px-6 lg:px-[var(--spacing-container-padding)]">
+    <div className="mesh-gradient w-full min-w-0">
+      <main className="w-full min-w-0 max-w-[1440px] mx-auto px-6 lg:px-[var(--spacing-container-padding)]">
         {/* Hero Section */}
-        <section className="relative pt-32 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[90vh]">
+        <section className="relative w-full min-w-0 pt-32 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[90vh]">
           {/* Ambient Background for Hero */}
           <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none">
             <div className="absolute w-[1000px] h-[1000px] rounded-full blur-[150px] bg-gradient-to-br from-indigo-200/40 dark:from-blue-900/20 via-transparent dark:via-slate-900 to-transparent opacity-60 dark:opacity-40" />
@@ -449,13 +449,13 @@ export default function Home() {
             initial={{ opacity: 0, x: -30, filter: 'blur(8px)' }}
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-8 z-10"
+            className="w-full min-w-0 space-y-8 z-10"
           >
             <h1 className="text-8xl md:text-9xl font-bold text-primary-forced dark:text-white leading-[0.9] tracking-tight">
               Clima<br/>
               <span className="text-blue-600 dark:text-blue-200">Cast</span>
             </h1>
-            <p className="text-xl md:text-2xl text-secondary-forced dark:text-slate-300 max-w-lg font-light leading-relaxed">
+            <p className="text-xl md:text-2xl text-secondary-forced dark:text-slate-300 max-w-[32rem] font-light leading-relaxed">
               Real-time climate intelligence<br/>for a changing world.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -536,16 +536,16 @@ export default function Home() {
         </section>
 
         {/* Climate Timeline Experience Centerpiece */}
-        <section className="py-32 relative">
+        <section className="w-full min-w-0 py-32 relative">
           <motion.div 
             initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="text-center mb-16 space-y-4 relative z-10"
+            className="w-full max-w-[56rem] mx-auto text-center mb-16 space-y-4 relative z-10"
           >
             <h2 className="text-3xl md:text-4xl font-light text-primary-forced dark:text-white tracking-tight">Climate Timeline <span className="text-indigo-600 dark:text-indigo-400">Experience</span></h2>
-            <p className="text-secondary-forced dark:text-slate-400 max-w-2xl mx-auto font-light">Seamlessly navigate from historical atmospheric memory to real-time present conditions, and explore glowing future projection paths.</p>
+            <p className="w-full max-w-[48rem] mx-auto text-secondary-forced dark:text-slate-400 font-light">Seamlessly navigate from historical atmospheric memory to real-time present conditions, and explore glowing future projection paths.</p>
           </motion.div>
           
           <motion.div 
@@ -553,15 +553,15 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="glass-card bg-slate-50/50 dark:bg-transparent p-10 rounded-3xl relative overflow-hidden"
+            className="w-full min-w-0 glass-card bg-slate-50/50 dark:bg-transparent p-6 sm:p-10 rounded-3xl relative overflow-hidden"
           >
             {/* Timeline Ambient Glow & Noise */}
             <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGZpbHRlciBpZD0ibiI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgbnVtT2N0YXZlcz0iNCIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNuKSIvPjwvc3ZnPg==')] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-48 bg-cyan-500/10 blur-[100px] pointer-events-none" />
             
-            <div className="flex items-center justify-between relative z-10 pt-4">
+            <div className="w-full min-w-0 flex items-center justify-between relative z-10 pt-4">
               {/* Past */}
-              <div className="flex-1 space-y-4 opacity-50 transition-opacity hover:opacity-80">
+              <div className="min-w-0 flex-1 space-y-4 opacity-50 transition-opacity hover:opacity-80">
                 <div className="text-label-caps text-secondary-forced dark:text-slate-400 tracking-wider">Past Observations</div>
                 <div className="h-0.5 w-full bg-slate-300 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div className="h-full w-full bg-gradient-to-r from-transparent to-slate-400 dark:to-slate-500" />
@@ -573,7 +573,7 @@ export default function Home() {
               </div>
 
               {/* Present Node */}
-              <div className="px-8 flex flex-col items-center relative z-20 -mt-2">
+              <div className="shrink-0 px-4 sm:px-8 flex flex-col items-center relative z-20 -mt-2">
                 <div className="text-label-caps text-cyan-600 dark:text-cyan-400 mb-4 tracking-widest drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">Live State</div>
                 <div className="relative">
                   <div className="absolute inset-0 rounded-full bg-cyan-400 animate-ping opacity-30" />
@@ -583,7 +583,7 @@ export default function Home() {
               </div>
 
               {/* Future */}
-              <div className="flex-1 space-y-4 relative">
+              <div className="min-w-0 flex-1 space-y-4 relative">
                 <div className="text-label-caps text-blue-600 dark:text-blue-400 text-right tracking-wider">Future Trajectory</div>
                 <div className="h-0.5 w-full bg-slate-300 dark:bg-slate-800 rounded-full overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-transparent w-full animate-pulse" />
@@ -608,7 +608,7 @@ export default function Home() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
-              className="grid grid-cols-3 gap-6 mt-12 relative z-10 items-start"
+              className="w-full min-w-0 grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 relative z-10 items-start"
             >
               {/* Historical Grounding */}
               <motion.div 
@@ -701,13 +701,13 @@ export default function Home() {
         </section>
 
         {/* Live Climate Preview */}
-        <section className="py-24 max-w-5xl mx-auto">
+        <section className="w-full min-w-0 py-24 max-w-[64rem] mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="flex justify-between items-end mb-8 px-2"
+            className="w-full min-w-0 flex justify-between items-end mb-8 px-2"
           >
             <div className="space-y-2">
               <h2 className="text-xl md:text-2xl font-medium text-primary-forced dark:text-white tracking-tight flex items-center gap-3">
@@ -721,7 +721,7 @@ export default function Home() {
             </Link>
           </motion.div>
           
-          <div className="space-y-[var(--spacing-card-gap)]">
+          <div className="w-full min-w-0 space-y-[var(--spacing-card-gap)]">
             {/* Top Main Card (Tokyo Showcase) */}
             <motion.div 
               initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
@@ -766,7 +766,7 @@ export default function Home() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-[var(--spacing-card-gap)] items-start"
+              className="w-full min-w-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-[var(--spacing-card-gap)] items-start"
             >
               {/* AQI */}
               <motion.div 
@@ -917,9 +917,9 @@ export default function Home() {
 
 
         {/* Our Approach & Final CTA */}
-        <section className="py-24 border-t border-[var(--theme-card-border)] dark:border-white/5  dark:bg-slate-950/40 backdrop-blur-xl relative overflow-hidden">
-          <div className="max-w-5xl mx-auto px-6 relative z-10">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
+        <section className="w-full min-w-0 py-24 border-t border-[var(--theme-card-border)] dark:border-white/5  dark:bg-slate-950/40 backdrop-blur-xl relative overflow-hidden">
+          <div className="w-full min-w-0 max-w-[64rem] mx-auto px-6 relative z-10">
+            <div className="w-full min-w-0 grid md:grid-cols-2 gap-16 items-center">
               <motion.div
                 initial={{ opacity: 0, x: -30, filter: 'blur(6px)' }}
                 whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
@@ -998,7 +998,7 @@ export default function Home() {
                     <span className="material-symbols-outlined text-3xl text-indigo-600 dark:text-indigo-400">explore</span>
                   </div>
                   <h3 className="text-2xl font-light text-primary-forced dark:text-white">Ready to explore?</h3>
-                  <p className="text-secondary-forced dark:text-slate-400 max-w-sm mx-auto">
+                  <p className="text-secondary-forced dark:text-slate-400 max-w-[24rem] mx-auto">
                     Access the complete environmental dashboard and begin monitoring global atmospheric shifts.
                   </p>
                   <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">

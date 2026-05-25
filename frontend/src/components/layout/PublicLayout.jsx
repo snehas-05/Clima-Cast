@@ -32,7 +32,7 @@ export default function PublicLayout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen w-full min-w-0 flex flex-col">
       {/* Top Navigation */}
       <header className="fixed top-0 w-full z-50 transition-colors duration-500 pt-6 pointer-events-none">
         <div className="flex justify-center items-center px-6 lg:px-[var(--spacing-container-padding)] max-w-[1440px] mx-auto">
@@ -63,7 +63,7 @@ export default function PublicLayout() {
       </header>
 
       {/* Page Content */}
-      <main className="flex-1">
+      <main className="flex-1 w-full min-w-0">
         <Outlet context={{ openModal, handleContactSales }} />
       </main>
 

@@ -120,8 +120,8 @@ export default function CitySearch() {
 
   return (
     <div className="relative flex-1 max-w-md group" ref={dropdownRef}>
-      <div className="relative flex items-center">
-        <span className="material-symbols-outlined absolute left-4 text-primary group-focus-within:text-on-surface transition-colors">search</span>
+      <div className="flex items-center gap-3">
+        <span className="material-symbols-outlined ml-3 text-primary group-focus-within:text-on-surface transition-colors">search</span>
         <input
           type="text"
           value={query}
@@ -129,15 +129,14 @@ export default function CitySearch() {
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 2 && results.length > 0 && setShowDropdown(true)}
           placeholder={`Search city (e.g. ${activeCity})`}
-          className="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all text-sm backdrop-blur-md"
+          className="w-full pl-4 pr-4 py-3 bg-white/90 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-white/10 transition-all text-sm text-on-surface placeholder:text-on-surface-variant/70 dark:placeholder:text-on-surface-variant/60 backdrop-blur-md"
         />
-        
         {loading ? (
-          <div className="absolute right-4 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="ml-2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0" />
         ) : (
           <button 
             onClick={resetToGPS}
-            className={`absolute right-4 p-1 rounded-lg transition-all ${isGPSMode ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`}
+            className={`ml-2 p-1 rounded-lg flex-shrink-0 transition-all ${isGPSMode ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`}
             title="Use My Location"
           >
             <span className="material-symbols-outlined text-[20px]">my_location</span>

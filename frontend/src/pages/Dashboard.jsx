@@ -40,6 +40,18 @@ export default function Dashboard() {
   
   const [airQuality, setAirQuality] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedCardAnchor, setSelectedCardAnchor] = useState(null);
+
+  const openCard = (card, event) => {
+    const anchorRect = event?.currentTarget?.getBoundingClientRect() || null;
+    setSelectedCard(card);
+    setSelectedCardAnchor(anchorRect);
+  };
+
+  const closeCard = () => {
+    setSelectedCard(null);
+    setSelectedCardAnchor(null);
+  };
 
   // Unified Orchestration Effect
   const fetchDashboardData = useCallback(async () => {
@@ -401,7 +413,7 @@ export default function Dashboard() {
         variants={containerVariants}
         initial="initial"
         animate="animate"
-        className="dashboard-shell dashboard-stack"
+        className="dashboard-shell dashboard-stack flex-1 w-full min-w-0 max-w-full"
       >
         
         {staleCache && (
@@ -434,22 +446,22 @@ export default function Dashboard() {
 
 
 
-        <div className="metric-grid">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 p-6">
           {metrics.map((m, idx) => (
             <MetricCard 
               key={m.label} 
               id={m.id}
               {...m} 
               delay={idx * 0.05}
-              onClick={() => setSelectedCard({ ...m, id: m.id })}
+              onClick={(e) => openCard({ ...m, id: m.id }, e)}
             />
           ))}
         </div>
 
-        <div className="panel-grid">
+        <div className="w-full max-w-7xl mx-auto panel-grid">
           <AnimatedCard 
             className="lg:col-span-8 card-pad-lg min-h-[420px] flex flex-col group border-white/5"
-            onClick={() => setSelectedCard({ id: 'current-conditions', title: 'Current Conditions' })}
+            onClick={(e) => openCard({ id: 'current-conditions', title: 'Current Conditions' }, e)}
             delay={0.3}
           >
             <div className={`absolute top-0 right-0 w-96 h-96 bg-gradient-to-br ${weatherData?.gradient || 'from-primary/20 to-transparent'} blur-[100px] opacity-20 -mr-32 -mt-32 transition-all duration-700 group-hover:scale-150 group-hover:opacity-40`} />
@@ -530,7 +542,7 @@ export default function Dashboard() {
                   <InsightCard 
                     key={idx} 
                     {...insight} 
-                    onClick={() => setSelectedCard({ ...insight, id: 'insight' })}
+                    onClick={(e) => openCard({ ...insight, id: 'insight' }, e)}
                   />
                 ))
               ) : (
@@ -543,7 +555,7 @@ export default function Dashboard() {
             
             <button 
               className="mt-8 w-full py-4 rounded-2xl bg-primary/5 border border-primary/20 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-all group"
-              onClick={() => setSelectedCard({ id: 'insight', title: 'Climate Intelligence Report', description: 'Detailed AI analysis of current atmospheric trends.' })}
+              onClick={(e) => openCard({ id: 'insight', title: 'Climate Intelligence Report', description: 'Detailed AI analysis of current atmospheric trends.' }, e)}
             >
               View Full Insights
               <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -553,7 +565,7 @@ export default function Dashboard() {
 
           <AnimatedCard 
             className="lg:col-span-12 card-pad-lg group border-white/5"
-            onClick={() => setSelectedCard({ id: 'forecast', title: '5-Day Forecast' })}
+            onClick={(e) => openCard({ id: 'forecast', title: '5-Day Forecast' }, e)}
             delay={0.5}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -580,7 +592,7 @@ export default function Dashboard() {
                     className="p-5 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center text-center hover:bg-white/10 hover:scale-[1.02] hover:shadow-2xl transition-all duration-500 cursor-pointer group/item"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedCard({ id: 'day-forecast', title: `${f.day} Forecast`, dayData: f });
+                      openCard({ id: 'day-forecast', title: `${f.day} Forecast`, dayData: f }, e);
                     }}
                   >
                     <p className="text-[10px] font-black text-on-surface-variant mb-4 group-hover/item:text-primary transition-colors tracking-widest uppercase">{f.day || '--'}</p>
@@ -601,8 +613,9 @@ export default function Dashboard() {
 
       <Modal 
         isOpen={!!selectedCard} 
-        onClose={() => setSelectedCard(null)}
+        onClose={closeCard}
         title={selectedCard?.title || selectedCard?.label || "Details"}
+        anchorRect={selectedCardAnchor}
       >
         {getModalContent()}
       </Modal>

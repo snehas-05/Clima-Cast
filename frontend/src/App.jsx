@@ -50,7 +50,10 @@ const PageLoader = () => (
 );
 
 const PageTransition = ({ children }) => (
-  <motion.div {...TRANSITIONS.ROUTE} className="flex-1 flex flex-col min-h-0">
+  <motion.div
+    {...TRANSITIONS.ROUTE}
+    className="flex-1 flex flex-col min-h-0 w-full min-w-0"
+  >
     {children}
   </motion.div>
 );

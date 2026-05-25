@@ -94,7 +94,7 @@ const AtmosphericBackground = ({ children }) => {
       )}
 
       {/* Content Layer */}
-      <div className="relative z-[10] min-h-screen">
+      <div className="relative z-[10] min-h-screen w-full min-w-0">
         {children}
       </div>
     </div>

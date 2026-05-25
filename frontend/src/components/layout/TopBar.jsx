@@ -21,7 +21,7 @@ const IconButton = ({ icon, onClick, ariaLabel }) => (
 );
 
 export default function TopBar({ title, subtitle, children }) {
-  const { activeCity } = useWeatherContext();
+  const { activeCity, resetToGPS, isGPSMode } = useWeatherContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -77,7 +77,7 @@ export default function TopBar({ title, subtitle, children }) {
     <header className="sticky top-0 z-40 glass-topbar">
       <div className="flex justify-between items-center h-[var(--spacing-topbar-height)] px-[var(--spacing-container-px)] max-w-[1440px] mx-auto w-full">
         {/* Left: Title + optional subtitle */}
-        <div className="flex items-center gap-var(--spacing-xl)">
+        <div className="flex items-center gap-6">
           <div>
             <h2 className="text-h2-dashboard text-primary truncate max-w-[200px] sm:max-w-none">{title}</h2>
             <p className="text-label-caps text-on-surface-variant/60 text-[10px] sm:text-xs">
@@ -87,7 +87,7 @@ export default function TopBar({ title, subtitle, children }) {
         </div>
 
         {/* Right: Search + actions */}
-        <div className="flex items-center gap-var(--spacing-md) relative">
+        <div className="flex items-center gap-4">
           {/* Unit Toggle */}
           <div className="hidden lg:block">
             <UnitToggle />
@@ -96,8 +96,18 @@ export default function TopBar({ title, subtitle, children }) {
           {/* Theme Toggle */}
           <ThemeToggle />
 
+          {/* Location Button (visible alongside theme) */}
+          <button
+            onClick={() => resetToGPS()}
+            aria-label="Use my location"
+            title="Use My Location"
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isGPSMode ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:bg-primary/5'}`}
+          >
+            <span className="material-symbols-outlined">my_location</span>
+          </button>
+
           {/* City Selector */}
-          <div className="hidden md:block flex-1 max-w-xs mx-var(--spacing-lg)">
+          <div className="hidden md:block flex-1 max-w-xs md:mx-4">
             <CitySearch />
           </div>
 
@@ -111,7 +121,7 @@ export default function TopBar({ title, subtitle, children }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
-              className="bg-white/5 border border-white/10 rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main placeholder:text-on-surface-variant/60 transition-all focus:w-80 backdrop-blur-md"
+              className="bg-white/90 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 rounded-full py-2.5 pl-10 pr-6 w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 text-body-main text-on-surface placeholder:text-on-surface-variant/70 dark:placeholder:text-on-surface-variant/60 transition-all focus:w-80 backdrop-blur-md"
               placeholder="Ask AI about weather..."
               aria-label="Ask AI weather question"
             />
@@ -139,13 +149,13 @@ export default function TopBar({ title, subtitle, children }) {
             />
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-80 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="px-var(--spacing-lg) py-var(--spacing-md) border-b border-outline-variant/30 bg-surface-container-low flex justify-between items-center">
+                <div className="px-4 py-3 border-b border-outline-variant/30 bg-surface-container-low flex justify-between items-center">
                   <h3 className="text-body-main font-bold text-on-surface">Notifications</h3>
                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">3 NEW</span>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.map(n => (
-                    <div key={n.id} className="px-var(--spacing-lg) py-var(--spacing-md) hover:bg-surface-container transition-colors cursor-pointer border-b border-outline-variant/10 last:border-0 flex gap-3">
+                    <div key={n.id} className="px-4 py-3 hover:bg-surface-container transition-colors cursor-pointer border-b border-outline-variant/10 last:border-0 flex gap-3">
                       <span className="material-symbols-outlined text-primary text-xl shrink-0">{n.icon}</span>
                       <div>
                         <p className="text-body-sm text-on-surface line-clamp-2">{n.text}</p>
@@ -161,12 +171,12 @@ export default function TopBar({ title, subtitle, children }) {
             )}
           </div>
 
-          <div className="h-8 w-px bg-outline-variant/30 mx-var(--spacing-md) hidden sm:block" />
+          <div className="h-8 w-px bg-outline-variant/30 mx-3 hidden sm:block" />
 
           {/* User avatar area */}
           <div className="relative">
             <button 
-              className="flex items-center gap-var(--spacing-md) cursor-pointer group focus:outline-none touch-target"
+              className="flex items-center gap-3 cursor-pointer group focus:outline-none touch-target"
               onClick={() => {
                 setShowDropdown(!showDropdown);
                 setShowNotifications(false);
@@ -187,16 +197,16 @@ export default function TopBar({ title, subtitle, children }) {
 
             {showDropdown && (
               <div 
-                className="absolute right-0 mt-var(--spacing-md) w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute right-0 mt-3 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
                 role="menu"
                 aria-orientation="vertical"
               >
-                <div className="px-var(--spacing-lg) py-var(--spacing-md) border-b border-outline-variant/30 sm:hidden" role="none">
+                <div className="px-4 py-3 border-b border-outline-variant/30 sm:hidden" role="none">
                   <p className="text-body-main font-semibold text-on-surface" role="none">{user?.name}</p>
                   <p className="text-label-caps text-on-surface-variant truncate" role="none">{user?.email}</p>
                 </div>
                 <button 
-                  className="w-full text-left px-var(--spacing-lg) py-var(--spacing-md) text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors touch-target"
+                  className="w-full text-left px-4 py-3 text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors touch-target"
                   onClick={() => {
                     alert("Navigating to Profile...");
                     setShowDropdown(false);
@@ -206,7 +216,7 @@ export default function TopBar({ title, subtitle, children }) {
                   Profile
                 </button>
                 <button 
-                  className="w-full text-left px-var(--spacing-lg) py-var(--spacing-md) text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors touch-target"
+                  className="w-full text-left px-4 py-3 text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors touch-target"
                   onClick={() => {
                     alert("Opening Security Settings...");
                     setShowDropdown(false);
@@ -215,11 +225,11 @@ export default function TopBar({ title, subtitle, children }) {
                   <span className="material-symbols-outlined text-[18px]">security</span>
                   Security
                 </button>
-                <div className="h-px bg-outline-variant/30 my-var(--spacing-sm)" />
+                <div className="h-px bg-outline-variant/30 my-2" />
                 <button 
                   onClick={logout}
                   role="menuitem"
-                  className="w-full text-left px-var(--spacing-lg) py-var(--spacing-md) text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors touch-target"
+                  className="w-full text-left px-4 py-3 text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors touch-target"
                 >
                   <span className="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
                   Logout
